@@ -1,0 +1,1535 @@
+{
+  "schemaVersion": 1,
+  "sessionId": "bathurst-demo-2026",
+  "streamId": "demo-stream",
+  "sequence": 0,
+  "sourceTimestamp": 1791682103400,
+  "receiptTimestamp": null,
+  "source": "demo",
+  "profile": "classification",
+  "session": {
+    "eventId": "bathurst-2026-demo",
+    "id": "bathurst-demo-2026",
+    "name": "Bathurst 1000",
+    "season": 2026,
+    "trackId": "mount-panorama",
+    "type": "race",
+    "raceLaps": 161,
+    "trackKm": 6.213,
+    "phase": "running",
+    "trackStatus": "green",
+    "leaderLaps": 42,
+    "elapsed": 5303400,
+    "remaining": null,
+    "timezone": "Australia/Sydney",
+    "capabilities": {
+      "classification": true,
+      "gapData": true,
+      "lapTiming": false,
+      "lapCrossings": false,
+      "sectorCrossings": false,
+      "pitStatus": true,
+      "currentDriver": true,
+      "positionSamples": false,
+      "raceControl": true
+    }
+  },
+  "entries": [
+    {
+      "id": "entry-0",
+      "number": "07",
+      "team": {
+        "id": "team-0",
+        "name": "Summit Racing",
+        "colour": "#E85D75"
+      },
+      "drivers": [
+        {
+          "id": "driver-0-0",
+          "name": "Alex Rowan"
+        },
+        {
+          "id": "driver-0-1",
+          "name": "Blake Mercer"
+        }
+      ],
+      "currentDriverId": "driver-0-0",
+      "position": 1,
+      "grid": 1,
+      "laps": 42,
+      "status": "running",
+      "gap": {
+        "kind": "leader"
+      },
+      "interval": {
+        "kind": "leader"
+      },
+      "lastLap": null,
+      "bestLap": null,
+      "currentSector": null,
+      "previousSectors": [
+        null,
+        null,
+        null
+      ],
+      "currentSectors": [
+        null,
+        null,
+        null
+      ],
+      "lastCrossing": null,
+      "lastLapCrossing": null,
+      "observation": {
+        "kind": "unavailable"
+      },
+      "pits": 0,
+      "observedAt": 5303400,
+      "lapHistory": [],
+      "stints": [
+        {
+          "driverId": "driver-0-0",
+          "fromLap": 0,
+          "at": 0
+        }
+      ],
+      "pitObservation": null,
+      "penalty": null
+    },
+    {
+      "id": "entry-1",
+      "number": "08",
+      "team": {
+        "id": "team-0",
+        "name": "Summit Racing",
+        "colour": "#E85D75"
+      },
+      "drivers": [
+        {
+          "id": "driver-1-0",
+          "name": "Casey Vale"
+        },
+        {
+          "id": "driver-1-1",
+          "name": "Drew Hart"
+        }
+      ],
+      "currentDriverId": "driver-1-0",
+      "position": 2,
+      "grid": 2,
+      "laps": 42,
+      "status": "running",
+      "gap": {
+        "kind": "seconds",
+        "value": 9405.780554413795
+      },
+      "interval": {
+        "kind": "seconds",
+        "value": 9405.780554413795
+      },
+      "lastLap": null,
+      "bestLap": null,
+      "currentSector": null,
+      "previousSectors": [
+        null,
+        null,
+        null
+      ],
+      "currentSectors": [
+        null,
+        null,
+        null
+      ],
+      "lastCrossing": null,
+      "lastLapCrossing": null,
+      "observation": {
+        "kind": "unavailable"
+      },
+      "pits": 0,
+      "observedAt": 5303400,
+      "lapHistory": [],
+      "stints": [
+        {
+          "driverId": "driver-1-0",
+          "fromLap": 0,
+          "at": 0
+        }
+      ],
+      "pitObservation": null,
+      "penalty": null
+    },
+    {
+      "id": "entry-2",
+      "number": "12",
+      "team": {
+        "id": "team-1",
+        "name": "Coastline Motorsport",
+        "colour": "#4EA5FF"
+      },
+      "drivers": [
+        {
+          "id": "driver-2-0",
+          "name": "Ellis Reed"
+        },
+        {
+          "id": "driver-2-1",
+          "name": "Finley Shaw"
+        }
+      ],
+      "currentDriverId": "driver-2-0",
+      "position": 3,
+      "grid": 3,
+      "laps": 41,
+      "status": "running",
+      "gap": {
+        "kind": "seconds",
+        "value": 16236.697864621878
+      },
+      "interval": {
+        "kind": "seconds",
+        "value": 7125.781939567998
+      },
+      "lastLap": null,
+      "bestLap": null,
+      "currentSector": null,
+      "previousSectors": [
+        null,
+        null,
+        null
+      ],
+      "currentSectors": [
+        null,
+        null,
+        null
+      ],
+      "lastCrossing": null,
+      "lastLapCrossing": null,
+      "observation": {
+        "kind": "unavailable"
+      },
+      "pits": 0,
+      "observedAt": 5303400,
+      "lapHistory": [],
+      "stints": [
+        {
+          "driverId": "driver-2-0",
+          "fromLap": 0,
+          "at": 0
+        }
+      ],
+      "pitObservation": null,
+      "penalty": null
+    },
+    {
+      "id": "entry-3",
+      "number": "13",
+      "team": {
+        "id": "team-1",
+        "name": "Coastline Motorsport",
+        "colour": "#4EA5FF"
+      },
+      "drivers": [
+        {
+          "id": "driver-3-0",
+          "name": "Gray Nolan"
+        },
+        {
+          "id": "driver-3-1",
+          "name": "Harper Quinn"
+        }
+      ],
+      "currentDriverId": "driver-3-0",
+      "position": 4,
+      "grid": 4,
+      "laps": 41,
+      "status": "running",
+      "gap": {
+        "kind": "seconds",
+        "value": 23960.058656799607
+      },
+      "interval": {
+        "kind": "seconds",
+        "value": 7723.360792177729
+      },
+      "lastLap": null,
+      "bestLap": null,
+      "currentSector": null,
+      "previousSectors": [
+        null,
+        null,
+        null
+      ],
+      "currentSectors": [
+        null,
+        null,
+        null
+      ],
+      "lastCrossing": null,
+      "lastLapCrossing": null,
+      "observation": {
+        "kind": "unavailable"
+      },
+      "pits": 0,
+      "observedAt": 5303400,
+      "lapHistory": [],
+      "stints": [
+        {
+          "driverId": "driver-3-0",
+          "fromLap": 0,
+          "at": 0
+        }
+      ],
+      "pitObservation": null,
+      "penalty": null
+    },
+    {
+      "id": "entry-4",
+      "number": "21",
+      "team": {
+        "id": "team-2",
+        "name": "Ironbark Racing",
+        "colour": "#F0B44D"
+      },
+      "drivers": [
+        {
+          "id": "driver-4-0",
+          "name": "Jamie Wells"
+        },
+        {
+          "id": "driver-4-1",
+          "name": "Kai Lawson"
+        }
+      ],
+      "currentDriverId": "driver-4-0",
+      "position": 5,
+      "grid": 5,
+      "laps": 41,
+      "status": "running",
+      "gap": {
+        "kind": "seconds",
+        "value": 33515.03257928137
+      },
+      "interval": {
+        "kind": "seconds",
+        "value": 9554.97392248176
+      },
+      "lastLap": null,
+      "bestLap": null,
+      "currentSector": null,
+      "previousSectors": [
+        null,
+        null,
+        null
+      ],
+      "currentSectors": [
+        null,
+        null,
+        null
+      ],
+      "lastCrossing": null,
+      "lastLapCrossing": null,
+      "observation": {
+        "kind": "unavailable"
+      },
+      "pits": 0,
+      "observedAt": 5303400,
+      "lapHistory": [],
+      "stints": [
+        {
+          "driverId": "driver-4-0",
+          "fromLap": 0,
+          "at": 0
+        }
+      ],
+      "pitObservation": null,
+      "penalty": null
+    },
+    {
+      "id": "entry-5",
+      "number": "22",
+      "team": {
+        "id": "team-2",
+        "name": "Ironbark Racing",
+        "colour": "#F0B44D"
+      },
+      "drivers": [
+        {
+          "id": "driver-5-0",
+          "name": "Logan Hayes"
+        },
+        {
+          "id": "driver-5-1",
+          "name": "Morgan Pike"
+        }
+      ],
+      "currentDriverId": "driver-5-0",
+      "position": 6,
+      "grid": 6,
+      "laps": 41,
+      "status": "running",
+      "gap": {
+        "kind": "seconds",
+        "value": 40022.933476283215
+      },
+      "interval": {
+        "kind": "seconds",
+        "value": 6507.900897001848
+      },
+      "lastLap": null,
+      "bestLap": null,
+      "currentSector": null,
+      "previousSectors": [
+        null,
+        null,
+        null
+      ],
+      "currentSectors": [
+        null,
+        null,
+        null
+      ],
+      "lastCrossing": null,
+      "lastLapCrossing": null,
+      "observation": {
+        "kind": "unavailable"
+      },
+      "pits": 0,
+      "observedAt": 5303400,
+      "lapHistory": [],
+      "stints": [
+        {
+          "driverId": "driver-5-0",
+          "fromLap": 0,
+          "at": 0
+        }
+      ],
+      "pitObservation": null,
+      "penalty": null
+    },
+    {
+      "id": "entry-6",
+      "number": "31",
+      "team": {
+        "id": "team-3",
+        "name": "Apex Valley",
+        "colour": "#A78BFA"
+      },
+      "drivers": [
+        {
+          "id": "driver-6-0",
+          "name": "Nico West"
+        },
+        {
+          "id": "driver-6-1",
+          "name": "Oakley Frost"
+        }
+      ],
+      "currentDriverId": "driver-6-0",
+      "position": 7,
+      "grid": 7,
+      "laps": 41,
+      "status": "running",
+      "gap": {
+        "kind": "seconds",
+        "value": 48227.29858531896
+      },
+      "interval": {
+        "kind": "seconds",
+        "value": 8204.365109035745
+      },
+      "lastLap": null,
+      "bestLap": null,
+      "currentSector": null,
+      "previousSectors": [
+        null,
+        null,
+        null
+      ],
+      "currentSectors": [
+        null,
+        null,
+        null
+      ],
+      "lastCrossing": null,
+      "lastLapCrossing": null,
+      "observation": {
+        "kind": "unavailable"
+      },
+      "pits": 0,
+      "observedAt": 5303400,
+      "lapHistory": [],
+      "stints": [
+        {
+          "driverId": "driver-6-0",
+          "fromLap": 0,
+          "at": 0
+        }
+      ],
+      "pitObservation": null,
+      "penalty": null
+    },
+    {
+      "id": "entry-7",
+      "number": "32",
+      "team": {
+        "id": "team-3",
+        "name": "Apex Valley",
+        "colour": "#A78BFA"
+      },
+      "drivers": [
+        {
+          "id": "driver-7-0",
+          "name": "Parker Lane"
+        },
+        {
+          "id": "driver-7-1",
+          "name": "Quinn Brooks"
+        }
+      ],
+      "currentDriverId": "driver-7-0",
+      "position": 8,
+      "grid": 8,
+      "laps": 41,
+      "status": "running",
+      "gap": {
+        "kind": "seconds",
+        "value": 58345.285401692614
+      },
+      "interval": {
+        "kind": "seconds",
+        "value": 10629.922488752753
+      },
+      "lastLap": null,
+      "bestLap": null,
+      "currentSector": null,
+      "previousSectors": [
+        null,
+        null,
+        null
+      ],
+      "currentSectors": [
+        null,
+        null,
+        null
+      ],
+      "lastCrossing": null,
+      "lastLapCrossing": null,
+      "observation": {
+        "kind": "unavailable"
+      },
+      "pits": 0,
+      "observedAt": 5303400,
+      "lapHistory": [],
+      "stints": [
+        {
+          "driverId": "driver-7-0",
+          "fromLap": 0,
+          "at": 0
+        }
+      ],
+      "pitObservation": null,
+      "penalty": null
+    },
+    {
+      "id": "entry-8",
+      "number": "41",
+      "team": {
+        "id": "team-4",
+        "name": "Southern Cross Sport",
+        "colour": "#3ECFAD"
+      },
+      "drivers": [
+        {
+          "id": "driver-8-0",
+          "name": "Riley Stone"
+        },
+        {
+          "id": "driver-8-1",
+          "name": "Sam Archer"
+        }
+      ],
+      "currentDriverId": "driver-8-0",
+      "position": 9,
+      "grid": 9,
+      "laps": 41,
+      "status": "running",
+      "gap": {
+        "kind": "seconds",
+        "value": 65804.01199352369
+      },
+      "interval": {
+        "kind": "seconds",
+        "value": 7458.726591831073
+      },
+      "lastLap": null,
+      "bestLap": null,
+      "currentSector": null,
+      "previousSectors": [
+        null,
+        null,
+        null
+      ],
+      "currentSectors": [
+        null,
+        null,
+        null
+      ],
+      "lastCrossing": null,
+      "lastLapCrossing": null,
+      "observation": {
+        "kind": "unavailable"
+      },
+      "pits": 0,
+      "observedAt": 5303400,
+      "lapHistory": [],
+      "stints": [
+        {
+          "driverId": "driver-8-0",
+          "fromLap": 0,
+          "at": 0
+        }
+      ],
+      "pitObservation": null,
+      "penalty": null
+    },
+    {
+      "id": "entry-9",
+      "number": "42",
+      "team": {
+        "id": "team-4",
+        "name": "Southern Cross Sport",
+        "colour": "#3ECFAD"
+      },
+      "drivers": [
+        {
+          "id": "driver-9-0",
+          "name": "Taylor Dean"
+        },
+        {
+          "id": "driver-9-1",
+          "name": "Avery Moss"
+        }
+      ],
+      "currentDriverId": "driver-9-0",
+      "position": 10,
+      "grid": 10,
+      "laps": 41,
+      "status": "running",
+      "gap": {
+        "kind": "seconds",
+        "value": 74023.43743418436
+      },
+      "interval": {
+        "kind": "seconds",
+        "value": 8219.425440660678
+      },
+      "lastLap": null,
+      "bestLap": null,
+      "currentSector": null,
+      "previousSectors": [
+        null,
+        null,
+        null
+      ],
+      "currentSectors": [
+        null,
+        null,
+        null
+      ],
+      "lastCrossing": null,
+      "lastLapCrossing": null,
+      "observation": {
+        "kind": "unavailable"
+      },
+      "pits": 0,
+      "observedAt": 5303400,
+      "lapHistory": [],
+      "stints": [
+        {
+          "driverId": "driver-9-0",
+          "fromLap": 0,
+          "at": 0
+        }
+      ],
+      "pitObservation": null,
+      "penalty": null
+    },
+    {
+      "id": "entry-10",
+      "number": "51",
+      "team": {
+        "id": "team-5",
+        "name": "Redgum Performance",
+        "colour": "#FF8A65"
+      },
+      "drivers": [
+        {
+          "id": "driver-10-0",
+          "name": "Cameron Finch"
+        },
+        {
+          "id": "driver-10-1",
+          "name": "Devon Marsh"
+        }
+      ],
+      "currentDriverId": "driver-10-0",
+      "position": 11,
+      "grid": 11,
+      "laps": 41,
+      "status": "running",
+      "gap": {
+        "kind": "seconds",
+        "value": 79993.1073553916
+      },
+      "interval": {
+        "kind": "seconds",
+        "value": 5969.669921207242
+      },
+      "lastLap": null,
+      "bestLap": null,
+      "currentSector": null,
+      "previousSectors": [
+        null,
+        null,
+        null
+      ],
+      "currentSectors": [
+        null,
+        null,
+        null
+      ],
+      "lastCrossing": null,
+      "lastLapCrossing": null,
+      "observation": {
+        "kind": "unavailable"
+      },
+      "pits": 0,
+      "observedAt": 5303400,
+      "lapHistory": [],
+      "stints": [
+        {
+          "driverId": "driver-10-0",
+          "fromLap": 0,
+          "at": 0
+        }
+      ],
+      "pitObservation": null,
+      "penalty": null
+    },
+    {
+      "id": "entry-11",
+      "number": "52",
+      "team": {
+        "id": "team-5",
+        "name": "Redgum Performance",
+        "colour": "#FF8A65"
+      },
+      "drivers": [
+        {
+          "id": "driver-11-0",
+          "name": "Eden Cole"
+        },
+        {
+          "id": "driver-11-1",
+          "name": "Frankie Knox"
+        }
+      ],
+      "currentDriverId": "driver-11-0",
+      "position": 12,
+      "grid": 12,
+      "laps": 41,
+      "status": "running",
+      "gap": {
+        "kind": "seconds",
+        "value": 89716.1178965997
+      },
+      "interval": {
+        "kind": "seconds",
+        "value": 9723.010541208088
+      },
+      "lastLap": null,
+      "bestLap": null,
+      "currentSector": null,
+      "previousSectors": [
+        null,
+        null,
+        null
+      ],
+      "currentSectors": [
+        null,
+        null,
+        null
+      ],
+      "lastCrossing": null,
+      "lastLapCrossing": null,
+      "observation": {
+        "kind": "unavailable"
+      },
+      "pits": 0,
+      "observedAt": 5303400,
+      "lapHistory": [],
+      "stints": [
+        {
+          "driverId": "driver-11-0",
+          "fromLap": 0,
+          "at": 0
+        }
+      ],
+      "pitObservation": null,
+      "penalty": null
+    },
+    {
+      "id": "entry-12",
+      "number": "61",
+      "team": {
+        "id": "team-6",
+        "name": "Harbour Works",
+        "colour": "#51C4DF"
+      },
+      "drivers": [
+        {
+          "id": "driver-12-0",
+          "name": "Hayden Bell"
+        },
+        {
+          "id": "driver-12-1",
+          "name": "Indigo Fox"
+        }
+      ],
+      "currentDriverId": "driver-12-0",
+      "position": 13,
+      "grid": 13,
+      "laps": 41,
+      "status": "running",
+      "gap": {
+        "kind": "seconds",
+        "value": 98816.96039341856
+      },
+      "interval": {
+        "kind": "seconds",
+        "value": 9100.842496818863
+      },
+      "lastLap": null,
+      "bestLap": null,
+      "currentSector": null,
+      "previousSectors": [
+        null,
+        null,
+        null
+      ],
+      "currentSectors": [
+        null,
+        null,
+        null
+      ],
+      "lastCrossing": null,
+      "lastLapCrossing": null,
+      "observation": {
+        "kind": "unavailable"
+      },
+      "pits": 0,
+      "observedAt": 5303400,
+      "lapHistory": [],
+      "stints": [
+        {
+          "driverId": "driver-12-0",
+          "fromLap": 0,
+          "at": 0
+        }
+      ],
+      "pitObservation": null,
+      "penalty": null
+    },
+    {
+      "id": "entry-13",
+      "number": "62",
+      "team": {
+        "id": "team-6",
+        "name": "Harbour Works",
+        "colour": "#51C4DF"
+      },
+      "drivers": [
+        {
+          "id": "driver-13-0",
+          "name": "Jesse North"
+        },
+        {
+          "id": "driver-13-1",
+          "name": "Kendall Lake"
+        }
+      ],
+      "currentDriverId": "driver-13-0",
+      "position": 14,
+      "grid": 14,
+      "laps": 41,
+      "status": "running",
+      "gap": {
+        "kind": "seconds",
+        "value": 104520.22033544257
+      },
+      "interval": {
+        "kind": "seconds",
+        "value": 6566.788140051067
+      },
+      "lastLap": null,
+      "bestLap": null,
+      "currentSector": null,
+      "previousSectors": [
+        null,
+        null,
+        null
+      ],
+      "currentSectors": [
+        null,
+        null,
+        null
+      ],
+      "lastCrossing": null,
+      "lastLapCrossing": null,
+      "observation": {
+        "kind": "unavailable"
+      },
+      "pits": 0,
+      "observedAt": 5303400,
+      "lapHistory": [],
+      "stints": [
+        {
+          "driverId": "driver-13-0",
+          "fromLap": 0,
+          "at": 0
+        }
+      ],
+      "pitObservation": null,
+      "penalty": null
+    },
+    {
+      "id": "entry-14",
+      "number": "71",
+      "team": {
+        "id": "team-7",
+        "name": "Mountain Line",
+        "colour": "#D784DD"
+      },
+      "drivers": [
+        {
+          "id": "driver-14-0",
+          "name": "Lee Dawson"
+        },
+        {
+          "id": "driver-14-1",
+          "name": "Marley Kent"
+        }
+      ],
+      "currentDriverId": "driver-14-0",
+      "position": 15,
+      "grid": 15,
+      "laps": 41,
+      "status": "running",
+      "gap": {
+        "kind": "seconds",
+        "value": 110893.92967185006
+      },
+      "interval": {
+        "kind": "seconds",
+        "value": 6373.709336407483
+      },
+      "lastLap": null,
+      "bestLap": null,
+      "currentSector": null,
+      "previousSectors": [
+        null,
+        null,
+        null
+      ],
+      "currentSectors": [
+        null,
+        null,
+        null
+      ],
+      "lastCrossing": null,
+      "lastLapCrossing": null,
+      "observation": {
+        "kind": "unavailable"
+      },
+      "pits": 0,
+      "observedAt": 5303400,
+      "lapHistory": [],
+      "stints": [
+        {
+          "driverId": "driver-14-0",
+          "fromLap": 0,
+          "at": 0
+        }
+      ],
+      "pitObservation": null,
+      "penalty": null
+    },
+    {
+      "id": "entry-15",
+      "number": "72",
+      "team": {
+        "id": "team-7",
+        "name": "Mountain Line",
+        "colour": "#D784DD"
+      },
+      "drivers": [
+        {
+          "id": "driver-15-0",
+          "name": "Noel Rivers"
+        },
+        {
+          "id": "driver-15-1",
+          "name": "Peyton Miles"
+        }
+      ],
+      "currentDriverId": "driver-15-0",
+      "position": 16,
+      "grid": 16,
+      "laps": 41,
+      "status": "running",
+      "gap": {
+        "kind": "seconds",
+        "value": 121975.2084880136
+      },
+      "interval": {
+        "kind": "seconds",
+        "value": 11081.27881616354
+      },
+      "lastLap": null,
+      "bestLap": null,
+      "currentSector": null,
+      "previousSectors": [
+        null,
+        null,
+        null
+      ],
+      "currentSectors": [
+        null,
+        null,
+        null
+      ],
+      "lastCrossing": null,
+      "lastLapCrossing": null,
+      "observation": {
+        "kind": "unavailable"
+      },
+      "pits": 0,
+      "observedAt": 5303400,
+      "lapHistory": [],
+      "stints": [
+        {
+          "driverId": "driver-15-0",
+          "fromLap": 0,
+          "at": 0
+        }
+      ],
+      "pitObservation": null,
+      "penalty": null
+    },
+    {
+      "id": "entry-16",
+      "number": "81",
+      "team": {
+        "id": "team-8",
+        "name": "Outback Engineering",
+        "colour": "#BDC96A"
+      },
+      "drivers": [
+        {
+          "id": "driver-16-0",
+          "name": "Remy Grant"
+        },
+        {
+          "id": "driver-16-1",
+          "name": "Sydney Cross"
+        }
+      ],
+      "currentDriverId": "driver-16-0",
+      "position": 17,
+      "grid": 17,
+      "laps": 41,
+      "status": "running",
+      "gap": {
+        "kind": "laps",
+        "value": 1
+      },
+      "interval": {
+        "kind": "seconds",
+        "value": 7597.848259210587
+      },
+      "lastLap": null,
+      "bestLap": null,
+      "currentSector": null,
+      "previousSectors": [
+        null,
+        null,
+        null
+      ],
+      "currentSectors": [
+        null,
+        null,
+        null
+      ],
+      "lastCrossing": null,
+      "lastLapCrossing": null,
+      "observation": {
+        "kind": "unavailable"
+      },
+      "pits": 0,
+      "observedAt": 5303400,
+      "lapHistory": [],
+      "stints": [
+        {
+          "driverId": "driver-16-0",
+          "fromLap": 0,
+          "at": 0
+        }
+      ],
+      "pitObservation": null,
+      "penalty": null
+    },
+    {
+      "id": "entry-17",
+      "number": "82",
+      "team": {
+        "id": "team-8",
+        "name": "Outback Engineering",
+        "colour": "#BDC96A"
+      },
+      "drivers": [
+        {
+          "id": "driver-17-0",
+          "name": "Toby Blair"
+        },
+        {
+          "id": "driver-17-1",
+          "name": "Arden Chase"
+        }
+      ],
+      "currentDriverId": "driver-17-0",
+      "position": 18,
+      "grid": 18,
+      "laps": 41,
+      "status": "running",
+      "gap": {
+        "kind": "laps",
+        "value": 1
+      },
+      "interval": {
+        "kind": "seconds",
+        "value": 7885.810483917594
+      },
+      "lastLap": null,
+      "bestLap": null,
+      "currentSector": null,
+      "previousSectors": [
+        null,
+        null,
+        null
+      ],
+      "currentSectors": [
+        null,
+        null,
+        null
+      ],
+      "lastCrossing": null,
+      "lastLapCrossing": null,
+      "observation": {
+        "kind": "unavailable"
+      },
+      "pits": 0,
+      "observedAt": 5303400,
+      "lapHistory": [],
+      "stints": [
+        {
+          "driverId": "driver-17-0",
+          "fromLap": 0,
+          "at": 0
+        }
+      ],
+      "pitObservation": null,
+      "penalty": null
+    },
+    {
+      "id": "entry-18",
+      "number": "91",
+      "team": {
+        "id": "team-9",
+        "name": "Westbound Racing",
+        "colour": "#F28AB2"
+      },
+      "drivers": [
+        {
+          "id": "driver-18-0",
+          "name": "Bailey Wren"
+        },
+        {
+          "id": "driver-18-1",
+          "name": "Darcy Flynn"
+        }
+      ],
+      "currentDriverId": "driver-18-0",
+      "position": 19,
+      "grid": 19,
+      "laps": 40,
+      "status": "running",
+      "gap": {
+        "kind": "laps",
+        "value": 1
+      },
+      "interval": {
+        "kind": "seconds",
+        "value": 8978.398098133504
+      },
+      "lastLap": null,
+      "bestLap": null,
+      "currentSector": null,
+      "previousSectors": [
+        null,
+        null,
+        null
+      ],
+      "currentSectors": [
+        null,
+        null,
+        null
+      ],
+      "lastCrossing": null,
+      "lastLapCrossing": null,
+      "observation": {
+        "kind": "unavailable"
+      },
+      "pits": 0,
+      "observedAt": 5303400,
+      "lapHistory": [],
+      "stints": [
+        {
+          "driverId": "driver-18-0",
+          "fromLap": 0,
+          "at": 0
+        }
+      ],
+      "pitObservation": null,
+      "penalty": null
+    },
+    {
+      "id": "entry-19",
+      "number": "92",
+      "team": {
+        "id": "team-9",
+        "name": "Westbound Racing",
+        "colour": "#F28AB2"
+      },
+      "drivers": [
+        {
+          "id": "driver-19-0",
+          "name": "Emery Tate"
+        },
+        {
+          "id": "driver-19-1",
+          "name": "Hollis Price"
+        }
+      ],
+      "currentDriverId": "driver-19-0",
+      "position": 20,
+      "grid": 20,
+      "laps": 40,
+      "status": "running",
+      "gap": {
+        "kind": "laps",
+        "value": 1
+      },
+      "interval": {
+        "kind": "seconds",
+        "value": 4590.402708671056
+      },
+      "lastLap": null,
+      "bestLap": null,
+      "currentSector": null,
+      "previousSectors": [
+        null,
+        null,
+        null
+      ],
+      "currentSectors": [
+        null,
+        null,
+        null
+      ],
+      "lastCrossing": null,
+      "lastLapCrossing": null,
+      "observation": {
+        "kind": "unavailable"
+      },
+      "pits": 0,
+      "observedAt": 5303400,
+      "lapHistory": [],
+      "stints": [
+        {
+          "driverId": "driver-19-0",
+          "fromLap": 0,
+          "at": 0
+        }
+      ],
+      "pitObservation": null,
+      "penalty": null
+    },
+    {
+      "id": "entry-20",
+      "number": "101",
+      "team": {
+        "id": "team-10",
+        "name": "Silver Fern Speed",
+        "colour": "#9DB2CE"
+      },
+      "drivers": [
+        {
+          "id": "driver-20-0",
+          "name": "Jordan Ash"
+        },
+        {
+          "id": "driver-20-1",
+          "name": "Kit Monroe"
+        }
+      ],
+      "currentDriverId": "driver-20-0",
+      "position": 21,
+      "grid": 21,
+      "laps": 40,
+      "status": "running",
+      "gap": {
+        "kind": "laps",
+        "value": 1
+      },
+      "interval": {
+        "kind": "seconds",
+        "value": 9877.967020876706
+      },
+      "lastLap": null,
+      "bestLap": null,
+      "currentSector": null,
+      "previousSectors": [
+        null,
+        null,
+        null
+      ],
+      "currentSectors": [
+        null,
+        null,
+        null
+      ],
+      "lastCrossing": null,
+      "lastLapCrossing": null,
+      "observation": {
+        "kind": "unavailable"
+      },
+      "pits": 0,
+      "observedAt": 5303400,
+      "lapHistory": [],
+      "stints": [
+        {
+          "driverId": "driver-20-0",
+          "fromLap": 0,
+          "at": 0
+        }
+      ],
+      "pitObservation": null,
+      "penalty": null
+    },
+    {
+      "id": "entry-21",
+      "number": "102",
+      "team": {
+        "id": "team-10",
+        "name": "Silver Fern Speed",
+        "colour": "#9DB2CE"
+      },
+      "drivers": [
+        {
+          "id": "driver-21-0",
+          "name": "Luca Voss"
+        },
+        {
+          "id": "driver-21-1",
+          "name": "Micah Wynn"
+        }
+      ],
+      "currentDriverId": "driver-21-0",
+      "position": 22,
+      "grid": 22,
+      "laps": 40,
+      "status": "running",
+      "gap": {
+        "kind": "laps",
+        "value": 1
+      },
+      "interval": {
+        "kind": "seconds",
+        "value": 7960.834872674197
+      },
+      "lastLap": null,
+      "bestLap": null,
+      "currentSector": null,
+      "previousSectors": [
+        null,
+        null,
+        null
+      ],
+      "currentSectors": [
+        null,
+        null,
+        null
+      ],
+      "lastCrossing": null,
+      "lastLapCrossing": null,
+      "observation": {
+        "kind": "unavailable"
+      },
+      "pits": 0,
+      "observedAt": 5303400,
+      "lapHistory": [],
+      "stints": [
+        {
+          "driverId": "driver-21-0",
+          "fromLap": 0,
+          "at": 0
+        }
+      ],
+      "pitObservation": null,
+      "penalty": null
+    },
+    {
+      "id": "entry-22",
+      "number": "111",
+      "team": {
+        "id": "team-11",
+        "name": "Horizon Autosport",
+        "colour": "#D9AD7C"
+      },
+      "drivers": [
+        {
+          "id": "driver-22-0",
+          "name": "Phoenix Hale"
+        },
+        {
+          "id": "driver-22-1",
+          "name": "Robin Shea"
+        }
+      ],
+      "currentDriverId": "driver-22-0",
+      "position": 23,
+      "grid": 23,
+      "laps": 40,
+      "status": "running",
+      "gap": {
+        "kind": "laps",
+        "value": 1
+      },
+      "interval": {
+        "kind": "seconds",
+        "value": 7538.95249448996
+      },
+      "lastLap": null,
+      "bestLap": null,
+      "currentSector": null,
+      "previousSectors": [
+        null,
+        null,
+        null
+      ],
+      "currentSectors": [
+        null,
+        null,
+        null
+      ],
+      "lastCrossing": null,
+      "lastLapCrossing": null,
+      "observation": {
+        "kind": "unavailable"
+      },
+      "pits": 0,
+      "observedAt": 5303400,
+      "lapHistory": [],
+      "stints": [
+        {
+          "driverId": "driver-22-0",
+          "fromLap": 0,
+          "at": 0
+        }
+      ],
+      "pitObservation": null,
+      "penalty": null
+    },
+    {
+      "id": "entry-23",
+      "number": "112",
+      "team": {
+        "id": "team-11",
+        "name": "Horizon Autosport",
+        "colour": "#D9AD7C"
+      },
+      "drivers": [
+        {
+          "id": "driver-23-0",
+          "name": "Sasha York"
+        },
+        {
+          "id": "driver-23-1",
+          "name": "Terry Ames"
+        }
+      ],
+      "currentDriverId": "driver-23-0",
+      "position": 24,
+      "grid": 24,
+      "laps": 40,
+      "status": "running",
+      "gap": {
+        "kind": "laps",
+        "value": 1
+      },
+      "interval": {
+        "kind": "seconds",
+        "value": 8604.708472564816
+      },
+      "lastLap": null,
+      "bestLap": null,
+      "currentSector": null,
+      "previousSectors": [
+        null,
+        null,
+        null
+      ],
+      "currentSectors": [
+        null,
+        null,
+        null
+      ],
+      "lastCrossing": null,
+      "lastLapCrossing": null,
+      "observation": {
+        "kind": "unavailable"
+      },
+      "pits": 0,
+      "observedAt": 5303400,
+      "lapHistory": [],
+      "stints": [
+        {
+          "driverId": "driver-23-0",
+          "fromLap": 0,
+          "at": 0
+        }
+      ],
+      "pitObservation": null,
+      "penalty": null
+    }
+  ],
+  "events": [
+    {
+      "id": "event-10002026-1",
+      "at": 5303400,
+      "entryIds": [],
+      "category": "status",
+      "message": "Demo checkpoint loaded · fictional entries and timing",
+      "origin": "supplied"
+    }
+  ]
+}

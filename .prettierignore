@@ -1,0 +1,9 @@
+node_modules/
+dist/
+public/
+package-lock.json
+test-results/
+playwright-report/
+**/._*
+src/assets/mount-panorama-osm-source.osm
+bathurst-pwa-stage-1-prompt.md
