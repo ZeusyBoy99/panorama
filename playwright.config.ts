@@ -1,7 +1,7 @@
 import { defineConfig, devices } from '@playwright/test';
 export default defineConfig({
   testDir: 'tests',
-  testMatch: '**/browser.spec.ts',
+  testMatch: ['**/browser.spec.ts', '**/map-regression.spec.ts'],
   testIgnore: '**/._*',
   fullyParallel: false,
   workers: 2,

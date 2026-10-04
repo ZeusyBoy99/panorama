@@ -4,20 +4,21 @@ Verified locally on **4 October 2026 (Australia/Perth)** with Node 24.11.0 / npm
 
 ## Commands actually run
 
-| Command                                  | Result                                                                                                                    |
-| ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
-| npm install                              | Dependencies installed and package-lock.json generated                                                                    |
-| npm run recording:generate               | Compact, versioned sector replay generated from engine; 7 snapshots / 60 seconds, about 390 KB                            |
-| node scripts/generate-icons.mjs          | 192/512px regular icons, 512px maskable and 180px Apple icon generated                                                    |
-| python3 scripts/generate-track.py        | Closed, locally projected OSM centerline and pit path generated                                                           |
-| npm run typecheck                        | Passed, strict TypeScript                                                                                                 |
-| npm run format:check                     | Passed                                                                                                                    |
-| npm run lint                             | Passed                                                                                                                    |
-| npm test                                 | 26 domain/pipeline/geometry checks passed before final handoff                                                            |
-| npm run build                            | Passed; app bundle and manifest/service worker generated; about 888 KiB precache                                          |
-| npm run preview + HTTP readiness request | Local production preview returned 200                                                                                     |
-| npm run test:browser                     | 14 browser checks passed: 7 Chromium + 7 WebKit, 42.0 seconds; targeted visual/theme/PWA checks rerun after final styling |
-| npm audit                                | Final installation reported 0 vulnerabilities after upgrading sharp to its patched release                                |
+| Command                                          | Result                                                                                         |
+| ------------------------------------------------ | ---------------------------------------------------------------------------------------------- |
+| npm install                                      | Dependencies installed and package-lock.json generated                                         |
+| npm run recording:generate                       | Compact, versioned sector replay generated from engine; 7 snapshots / 60 seconds, about 390 KB |
+| node scripts/generate-icons.mjs                  | 192/512px regular icons, 512px maskable and 180px Apple icon generated                         |
+| python3 scripts/generate-track.py                | Closed, locally projected OSM centerline and pit path generated                                |
+| npm run typecheck                                | Passed, strict TypeScript                                                                      |
+| npm run format:check                             | Passed                                                                                         |
+| npm run lint                                     | Passed                                                                                         |
+| npm test                                         | 27 domain/pipeline/geometry checks passed before final handoff                                 |
+| npm run build                                    | Passed; app bundle and manifest/service worker generated; about 889 KiB precache               |
+| npm run preview + HTTP readiness request         | Local production preview returned 200                                                          |
+| npm run test:browser -- tests/browser.spec.ts    | 14 existing browser flows passed: 7 Chromium + 7 WebKit, 43.3 seconds                          |
+| npx playwright test tests/map-regression.spec.ts | 8 map/theme regressions passed: 4 Chromium + 4 WebKit, 14.0 seconds                            |
+| npm audit                                        | Final installation reported 0 vulnerabilities after upgrading sharp to its patched release     |
 
 Early failures were repaired and rerun: platform AppleDouble metadata excluded from lint/test/cache patterns; compact replay brought below the Workbox asset limit; URL-selection feedback loop removed; controls explicitly labelled; mobile row taps open details; reduced-motion freshness timer added; range scrubber subscribed to accepted data; initial service-worker claiming enabled without forcing updates. Browser tests use real keyboard range interaction rather than programmatically filling a slider. Advanced-options tests preserve the expanded disclosure across dialog reopen.
 
@@ -28,6 +29,8 @@ Deterministic seeded clock across cadence/acceleration; valid summed sector timi
 ## Browser coverage
 
 Both Chromium 153 and WebKit 26.6 covered the default working 24-car demo, demo labels, driver search, favourite/reload persistence, row/map shared selection, car deep links/navigation, all map profiles, pause, dialog Escape, friendly/Hacker UI switch, theme/reduced motion, pit driver changes, stable favourites, chequered/finished state, real-time outage/recovery, malformed and duplicate data, bundled replay/seek/export/import/errors, and URL preview making no requests or storing query secrets.
+
+The map/theme regression suite additionally checks repeated selection during animation, all car centres remaining within 0.8 SVG units of the appropriate main/pit path through a pit cycle, visible pit-lane separation, non-overlapping Griffin’s Bend and Panorama text, fresh system-theme defaults, system appearance changes, and persisted manual overrides. Selection no longer restarts the smoothing interval; overlap handling offsets number labels rather than car bodies. The driving-direction arrow has been removed.
 
 Both verified production manifest, icon requests and service-worker readiness/controller. **Chromium additionally verified offline reload and loading the precached replay while offline. WebKit offline reload is not claimed:** Playwright's WebKit encountered an internal reload error under emulated offline mode, so its automated case stops after registration/asset checks. Real Safari/iPhone offline testing remains necessary.
 

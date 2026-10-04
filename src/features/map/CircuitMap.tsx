@@ -7,7 +7,6 @@ import {
   trackLabels,
   sectorAnchors,
   startFinish,
-  directionArrow,
   trackGeometryNotice,
   trackAttribution,
   northArrow,
@@ -44,7 +43,11 @@ export const CircuitMap = memo(function CircuitMap({ large = false }: { large?: 
   const profile = snapshot?.profile ?? 'position';
   useEffect(() => {
     if (!snapshot) return;
-    const before = previous.current;
+    const before =
+      previous.current?.sessionId === snapshot.sessionId &&
+      previous.current?.streamId === snapshot.streamId
+        ? previous.current
+        : null;
     const began = performance.now();
     let frame = 0;
     let freshness: ReturnType<typeof setInterval> | null = null;
@@ -53,8 +56,9 @@ export const CircuitMap = memo(function CircuitMap({ large = false }: { large?: 
       const delta = status.paused || cached ? 0 : Math.max(0, now - received) * status.speed;
       const time = snapshot.session.elapsed + delta;
       const occupied: { x: number; y: number }[] = [];
+      const selectedId = useUI.getState().selectedId;
       const order = [...snapshot.entries].sort(
-        (a, b) => (a.id === selected ? 1 : 0) - (b.id === selected ? 1 : 0),
+        (a, b) => (a.id === selectedId ? 1 : 0) - (b.id === selectedId ? 1 : 0),
       );
       for (const car of order) {
         const node = nodes.current.get(car.id);
@@ -87,19 +91,28 @@ export const CircuitMap = memo(function CircuitMap({ large = false }: { large?: 
         node.style.display = '';
         node.style.opacity = p.confidence === 'stale' ? '.35' : p.confidence === 'low' ? '.7' : '1';
         const point = pointAt(p.pitProgress ?? progress, p.pitProgress !== null);
-        let x = point.x,
-          y = point.y;
+        let labelX = 0,
+          labelY = 0;
         let neighbours = 0;
         for (const o of occupied) if (Math.hypot(point.x - o.x, point.y - o.y) < 23) neighbours++;
         if (neighbours) {
           const side = neighbours % 2 ? 1 : -1;
           const offset = Math.ceil(neighbours / 2) * 22;
           const angle = (point.angle * Math.PI) / 180;
-          x += -Math.sin(angle) * offset * side;
-          y += Math.cos(angle) * offset * side;
+          labelX = -Math.sin(angle) * offset * side;
+          labelY = Math.cos(angle) * offset * side;
         }
         occupied.push(point);
-        node.setAttribute('transform', 'translate(' + x + ' ' + y + ')');
+        node.setAttribute('transform', 'translate(' + point.x + ' ' + point.y + ')');
+        node.dataset.path = p.pitProgress === null ? 'track' : 'pit';
+        node.dataset.progress = String(progress);
+        const label = node.querySelector<SVGGElement>('.marker-label');
+        label?.setAttribute('transform', 'translate(' + labelX + ' ' + labelY + ')');
+        if (label) label.dataset.offset = neighbours ? 'true' : 'false';
+        const leader = node.querySelector<SVGLineElement>('.marker-leader');
+        leader?.setAttribute('x2', String(labelX));
+        leader?.setAttribute('y2', String(labelY));
+        if (leader) leader.style.display = neighbours ? '' : 'none';
         node.dataset.confidence = p.confidence;
         const title = node.querySelector('title');
         if (title) title.textContent = '#' + car.number + ' · ' + p.provenance + ' · ' + p.reason;
@@ -121,7 +134,7 @@ export const CircuitMap = memo(function CircuitMap({ large = false }: { large?: 
       if (freshness) clearInterval(freshness);
       document.removeEventListener('visibilitychange', visibility);
     };
-  }, [snapshot, received, status, selected, reduced, cached]);
+  }, [snapshot, received, status, reduced, cached]);
   const unavailable =
     snapshot?.entries.filter(
       (e) => resolvePosition(e, snapshot, snapshot.session.elapsed).progress === null,
@@ -274,18 +287,7 @@ export const CircuitMap = memo(function CircuitMap({ large = false }: { large?: 
             >
               START / FINISH
             </text>
-            <path
-              d="M-7,-6 L5,0 L-7,6"
-              className="direction-arrow"
-              transform={
-                'translate(' +
-                directionArrow.point.join(' ') +
-                ') rotate(' +
-                directionArrow.rotation +
-                ')'
-              }
-            />
-            <g transform="translate(595 70)">
+            <g className="north-indicator" transform="translate(595 70)">
               <g transform={'rotate(' + northArrow.rotation + ')'}>
                 <path d="M-12,0 L12,0 M5,-5 L12,0 L5,5" className="direction-arrow" />
               </g>
@@ -293,10 +295,10 @@ export const CircuitMap = memo(function CircuitMap({ large = false }: { large?: 
                 N
               </text>
             </g>
-            <text x="340" y="292" textAnchor="middle" className="map-watermark">
+            <text x="340" y="315" textAnchor="middle" className="map-watermark">
               PANORAMA
             </text>
-            <text x="340" y="316" textAnchor="middle" className="map-distance">
+            <text x="340" y="341" textAnchor="middle" className="map-distance">
               THE MOUNTAIN · 6.213 KM
             </text>
             {[...(snapshot?.entries ?? [])]
@@ -328,9 +330,13 @@ export const CircuitMap = memo(function CircuitMap({ large = false }: { large?: 
                   <title>Car {e.number}</title>
                   <circle className="marker-ring" r="18" />
                   <circle className="marker-body" r="13" />
-                  <text textAnchor="middle" dy="4.5">
-                    {e.number}
-                  </text>
+                  <line className="marker-leader" x1="0" y1="0" x2="0" y2="0" />
+                  <g className="marker-label" data-offset="false">
+                    <circle className="marker-label-backdrop" r="11" />
+                    <text textAnchor="middle" dy="4.5">
+                      {e.number}
+                    </text>
+                  </g>
                 </g>
               ))}
           </g>

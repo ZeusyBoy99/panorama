@@ -4,11 +4,13 @@
  * Local projection/rotation/scale by Panorama. The outline is geographical centerline data,
  * not surveyed telemetry. Sector/service anchors are synthetic. Familiar race-map rotation
  * aligns Pit Straight vertically as the Supercars circuit-map reference; racing follows the verified anti-clockwise route.
+ * Displayed pit road is widened toward the interior for legibility; pitSourcePoints preserves mapped spacing.
  * Source retained in mount-panorama-osm-source.osm; regenerate with scripts/generate-track.py.
  */
 export type TrackPoint = readonly [x: number, y: number];
 export const trackViewBox = '0 0 680 520';
-export const trackGeometryNotice = 'Map © OpenStreetMap contributors · demo sector anchors';
+export const trackGeometryNotice =
+  'Map © OpenStreetMap contributors · pit lane widened · demo sector anchors';
 export const trackAttribution = {
   url: 'https://www.openstreetmap.org/copyright',
   label: 'OpenStreetMap contributors',
@@ -380,7 +382,7 @@ export const trackPoints: readonly TrackPoint[] = [
   [579.978, 343.458],
   [579.978, 343.458],
 ];
-export const pitPoints: readonly TrackPoint[] = [
+export const pitSourcePoints: readonly TrackPoint[] = [
   [540.45, 371.656],
   [540.45, 371.656],
   [549.403, 370.042],
@@ -429,6 +431,56 @@ export const pitPoints: readonly TrackPoint[] = [
   [545.047, 256.023],
   [545.047, 256.023],
 ];
+export const pitDisplayOffset = 30;
+export const pitPoints: readonly TrackPoint[] = [
+  [540.45, 371.656],
+  [540.45, 371.656],
+  [543.998, 370.042],
+  [540.116, 368.131],
+  [540.063, 367.97],
+  [540.052, 367.695],
+  [540.029, 367.322],
+  [539.851, 366.728],
+  [539.058, 364.287],
+  [539.136, 363.532],
+  [539.601, 362.941],
+  [540.741, 361.985],
+  [541.48, 361.121],
+  [542.052, 359.772],
+  [542.989, 355.308],
+  [543.155, 354.518],
+  [543.769, 353.332],
+  [544.675, 352.355],
+  [546.121, 351.26],
+  [546.512, 350.625],
+  [546.812, 350.138],
+  [547.079, 348.916],
+  [547.57, 346.734],
+  [547.564, 343.162],
+  [547.61, 333.62],
+  [547.639, 318.345],
+  [547.851, 303.319],
+  [547.941, 288.124],
+  [548.077, 271.038],
+  [548.039, 269.606],
+  [547.933, 268.212],
+  [547.692, 266.905],
+  [547.281, 265.706],
+  [546.709, 264.414],
+  [546.017, 263.121],
+  [545.447, 262.028],
+  [545.027, 260.959],
+  [544.799, 259.761],
+  [544.774, 259.006],
+  [544.79, 258.375],
+  [544.847, 257.929],
+  [544.925, 257.683],
+  [545.103, 257.576],
+  [545.422, 257.469],
+  [546.418, 257.405],
+  [545.047, 256.023],
+  [545.047, 256.023],
+];
 const path = (p: readonly TrackPoint[]) =>
   p.map(([x, y], i) => (i ? 'L' : 'M') + x + ',' + y).join(' ');
 export const trackPath = path(trackPoints) + ' Z';
@@ -441,9 +493,9 @@ export const pitExitAnchor = {
   mainProgress: 0.08521712974857726,
   point: [545.047, 256.023] as TrackPoint,
 };
-export const pitServicePoint = [577.079, 348.916] as TrackPoint;
-export const pitServiceProgress = 0.2896955364422555;
-export const pitFinishProgress = 0.32426278916317575;
+export const pitServicePoint = [547.079, 348.916] as TrackPoint;
+export const pitServiceProgress = 0.24069731604112343;
+export const pitFinishProgress = 0.2845609172084552;
 export const startFinish = {
   point: [579.978, 343.458] as TrackPoint,
   line: [
@@ -478,7 +530,7 @@ export const sectorAnchors = [
 export const trackLabels = [
   { name: 'Hell Corner', x: 639, y: 234, anchor: 'end' },
   { name: 'Mountain Straight', x: 454, y: 235, anchor: 'middle' },
-  { name: 'Griffins Bend', x: 338, y: 277, anchor: 'middle' },
+  { name: 'Griffins Bend', x: 300, y: 263, anchor: 'end' },
   { name: 'The Cutting', x: 369, y: 153, anchor: 'start' },
   { name: 'Reid Park', x: 266, y: 212, anchor: 'middle' },
   { name: 'Sulman Park', x: 209, y: 108, anchor: 'middle' },
@@ -490,7 +542,7 @@ export const trackLabels = [
   { name: 'Conrod Straight', x: 308, y: 401, anchor: 'middle' },
   { name: 'The Chase', x: 454, y: 429, anchor: 'middle' },
   { name: 'Murray\u2019s Corner', x: 593, y: 411, anchor: 'end' },
-  { name: 'Pit lane', x: 545, y: 315, anchor: 'end' },
+  { name: 'Pit lane', x: 533, y: 315, anchor: 'end' },
 ] as const;
 export const directionArrow = {
   point: [446.476, 255.325] as TrackPoint,

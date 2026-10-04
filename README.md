@@ -34,10 +34,10 @@ npm run test:browser
 ## Use the race companion
 
 - **Standings:** search by number, either driver, or team; toggle leader gaps/intervals; star favourites; select a row. Mobile row taps open details immediately.
-- **Track map:** pan by dragging, zoom with buttons or a two-finger pinch, reset to fit, select numbered markers. Keyboard users can tab to markers and press Enter/Space. Close labels receive alternating lateral offsets.
+- **Track map:** pan by dragging, zoom with buttons or a two-finger pinch, reset to fit, select numbered markers. Keyboard users can tab to markers and press Enter/Space. Car bodies stay on the path; crowded number labels use small connector lines. Selecting a car does not restart its motion.
 - **Car details:** classification, drivers, lap/sector history, trend, stints, pit stops, penalties and related events. Selection survives navigation and reload through `?car=entry-…`.
 - **Race updates:** supplied and derived events are labelled separately, with a favourites filter. Derived classification changes are not claims about physical overtaking locations.
-- **Settings:** a friendly default interface with optional Hacker UI, dark/light/system theme, row density, reduced motion, favourites, feature-detected wake lock, replay import/export, installation guidance and an inert timing-URL format preview.
+- **Settings:** a friendly default interface with optional Hacker UI, dark/light/system theme (Follow system by default), row density, reduced motion, favourites, feature-detected wake lock, replay import/export, installation guidance and an inert timing-URL format preview.
 - **Demo controls (Race lab in Hacker UI):** scenario, deterministic seed, four map capability modes, pause/resume/reset, 1×/5×/20×, and injected feed failures. It is separate from the normal fan-facing display.
 
 All transport snapshots pass the same runtime schema and session controller. Favourites and preferences are stored locally. A bounded last-known snapshot retains its original receipt timestamp; restarting opens a fresh, visibly labelled demo rather than implying cached information is live.

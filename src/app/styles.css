@@ -860,6 +860,23 @@ main {
   stroke: var(--panel);
   stroke-width: 2;
 }
+.marker-leader {
+  stroke: var(--team);
+  stroke-width: 1.5;
+  pointer-events: none;
+}
+.marker-label-backdrop {
+  display: none;
+  fill: var(--panel);
+  stroke: var(--team);
+  stroke-width: 1.5;
+}
+.marker-label[data-offset='true'] .marker-label-backdrop {
+  display: inline;
+}
+.marker-label[data-offset='true'] text {
+  fill: var(--text);
+}
 .car-marker text {
   font-size: 10px;
   font-weight: 750;

@@ -44,23 +44,44 @@ for ref in ['37594848','385686852']:
  if pitids and pitids[-1]!=ids[0]:ids.reverse()
  assert not pitids or pitids[-1]==ids[0]
  pitids.extend(ids[1:] if pitids else ids)
-pit=[project(rotate(raw(i))) for i in pitids]
-entryMain=points[nearest(pit[0],points)];exitMain=points[nearest(pit[-1],points)];pit=[entryMain]+pit+[exitMain]
+pitSource=[project(rotate(raw(i))) for i in pitids]
+entryMain=points[nearest(pitSource[0],points)];exitMain=points[nearest(pitSource[-1],points)];pitSource=[entryMain]+pitSource+[exitMain]
+# At this map scale the mapped pit road is only 2–3 SVG units from Pit Straight.
+# The diagram's road/marker widths are larger, so widen the displayed lane toward
+# the circuit interior. Keep the real coordinates separately and taper smoothly
+# back to the exact mapped entry/exit. This is presentation spacing, not new GPS.
+sourceLength=[0]
+for a,b in zip(pitSource,pitSource[1:]):sourceLength.append(sourceLength[-1]+math.dist(a,b))
+pitDisplayOffset=30
+def smoothstep(t):
+ t=max(0,min(1,t));return t*t*(3-2*t)
+def pitOffset(distance):
+ p=distance/sourceLength[-1]
+ return pitDisplayOffset*min(smoothstep(p/.2),smoothstep((1-p)/.2))
+pit=[[round(x-pitOffset(distance),3),y] for (x,y),distance in zip(pitSource,sourceLength)]
 # Driver service is a synthetic point upstream of the finish line, not a measured pit stall.
 pitlength=[0]
 for a,b in zip(pit,pit[1:]):pitlength.append(pitlength[-1]+math.dist(a,b))
 serviceIndex=round(len(pit)*.45);service=pit[serviceIndex];serviceProgress=pitlength[serviceIndex]/pitlength[-1]
-finishPitIndex=nearest(finish,pit);finishPitProgress=pitlength[finishPitIndex]/pitlength[-1]
+finishCrossings=[]
+for i,(a,b) in enumerate(zip(pit,pit[1:])):
+ if a[1]>finish[1]>=b[1]:
+  f=(a[1]-finish[1])/(a[1]-b[1])
+  finishCrossings.append((pitlength[i]+f*math.dist(a,b))/pitlength[-1])
+assert len(finishCrossings)==1,'Pit road must cross the horizontal finish line once'
+finishPitProgress=finishCrossings[0]
 anchors={}
 for name,start,end in ranges:
  anchors[name]=project(rotated[(start+end)//2])
 s1=anchors['The Cutting'];s2=anchors["Forrest's Elbow"]
 # Manually placed text surrounds the sourced outline without changing geometry.
-labels=[('Hell Corner',639,234,'end'),('Mountain Straight',454,235,'middle'),('Griffins Bend',338,277,'middle'),('The Cutting',369,153,'start'),('Reid Park',266,212,'middle'),('Sulman Park',209,108,'middle'),('McPhillamy Park',127,143,'end'),('Skyline',116,224,'end'),('The Esses',109,281,'end'),('The Dipper',109,316,'end'),('Forrest’s Elbow',112,398,'middle'),('Conrod Straight',308,401,'middle'),('The Chase',454,429,'middle'),('Murray’s Corner',593,411,'end'),('Pit lane',545,315,'end')]
+labels=[('Hell Corner',639,234,'end'),('Mountain Straight',454,235,'middle'),('Griffins Bend',300,263,'end'),('The Cutting',369,153,'start'),('Reid Park',266,212,'middle'),('Sulman Park',209,108,'middle'),('McPhillamy Park',127,143,'end'),('Skyline',116,224,'end'),('The Esses',109,281,'end'),('The Dipper',109,316,'end'),('Forrest’s Elbow',112,398,'middle'),('Conrod Straight',308,401,'middle'),('The Chase',454,429,'middle'),('Murray’s Corner',593,411,'end'),('Pit lane',533,315,'end')]
 # Keep track shape centered and permit labels after projection inspection.
-out='''/**\n * Geometry derived from OpenStreetMap relation 6942508, © OpenStreetMap contributors.\n * ODbL 1.0: https://www.openstreetmap.org/copyright\n * Local projection/rotation/scale by Panorama. The outline is geographical centerline data,\n * not surveyed telemetry. Sector/service anchors are synthetic. Familiar race-map rotation\n * aligns Pit Straight vertically as the Supercars circuit-map reference; racing follows the verified anti-clockwise route.\n * Source retained in mount-panorama-osm-source.osm; regenerate with scripts/generate-track.py.\n */\nexport type TrackPoint = readonly [x:number,y:number];\nexport const trackViewBox='0 0 680 520';\nexport const trackGeometryNotice='Map © OpenStreetMap contributors · demo sector anchors';\nexport const trackAttribution={url:'https://www.openstreetmap.org/copyright',label:'OpenStreetMap contributors',license:'ODbL 1.0'};\n'''
+out='''/**\n * Geometry derived from OpenStreetMap relation 6942508, © OpenStreetMap contributors.\n * ODbL 1.0: https://www.openstreetmap.org/copyright\n * Local projection/rotation/scale by Panorama. The outline is geographical centerline data,\n * not surveyed telemetry. Sector/service anchors are synthetic. Familiar race-map rotation\n * aligns Pit Straight vertically as the Supercars circuit-map reference; racing follows the verified anti-clockwise route.\n * Displayed pit road is widened toward the interior for legibility; pitSourcePoints preserves mapped spacing.\n * Source retained in mount-panorama-osm-source.osm; regenerate with scripts/generate-track.py.\n */\nexport type TrackPoint = readonly [x:number,y:number];\nexport const trackViewBox='0 0 680 520';\nexport const trackGeometryNotice='Map © OpenStreetMap contributors · pit lane widened · demo sector anchors';\nexport const trackAttribution={url:'https://www.openstreetmap.org/copyright',label:'OpenStreetMap contributors',license:'ODbL 1.0'};\n'''
 array=lambda x:json.dumps(x,separators=(',',':'))
 out+='export const trackPoints:readonly TrackPoint[]='+array(points)+';\n'
+out+='export const pitSourcePoints:readonly TrackPoint[]='+array(pitSource)+';\n'
+out+='export const pitDisplayOffset='+str(pitDisplayOffset)+';\n'
 out+='export const pitPoints:readonly TrackPoint[]='+array(pit)+';\n'
 out+="const path=(p:readonly TrackPoint[])=>p.map(([x,y],i)=>(i?'L':'M')+x+','+y).join(' ');\nexport const trackPath=path(trackPoints)+' Z';\nexport const pitPath=path(pitPoints);\n"
 out+='export const pitEntryAnchor={mainProgress:'+str(progress(entryMain))+',point:'+array(entryMain)+' as TrackPoint};\n'
