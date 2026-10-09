@@ -13,6 +13,7 @@ import {
 } from '../../assets/track';
 import { pointAt } from './geometry';
 import { resolvePosition } from './resolver';
+import { observeReport, renderProgress, type LegStats, type MotionState } from './liveMotion';
 import { unwrapForward } from '../../domain/speed';
 import { Icon } from '../../components/Icon';
 import type { Snapshot } from '../../domain/schema';
@@ -28,6 +29,8 @@ export const CircuitMap = memo(function CircuitMap({ large = false }: { large?: 
   const svg = useRef<SVGSVGElement>(null);
   const nodes = useRef(new Map<string, SVGGElement>());
   const previous = useRef<Snapshot | null>(null);
+  const motion = useRef(new Map<string, MotionState>());
+  const fleet = useRef<LegStats[]>([]);
   const [view, setView] = useState({ zoom: 1, x: 0, y: 0 });
   const viewRef = useRef(view);
   viewRef.current = view;
@@ -48,6 +51,8 @@ export const CircuitMap = memo(function CircuitMap({ large = false }: { large?: 
       previous.current?.streamId === snapshot.streamId
         ? previous.current
         : null;
+    // A new stream/session restarts every car's motion from its next report.
+    if (!before) motion.current.clear();
     const began = performance.now();
     let frame = 0;
     let freshness: ReturnType<typeof setInterval> | null = null;
@@ -65,23 +70,29 @@ export const CircuitMap = memo(function CircuitMap({ large = false }: { large?: 
         if (!node) continue;
         const p = resolvePosition(car, snapshot, time);
         let progress = p.progress;
-        if (
-          progress !== null &&
-          car.observation.kind === 'position' &&
-          !reduced &&
-          before &&
-          car.status === 'running'
-        ) {
-          const prior = before.entries.find((e) => e.id === car.id);
-          if (
-            prior?.observation.kind === 'position' &&
-            prior.observation.at !== car.observation.at &&
-            car.observation.at - prior.observation.at < 20000
-          ) {
-            const start = prior.observation.progress,
-              target = unwrapForward(start, progress);
-            if (target - start >= 0 && target - start < 0.3)
-              progress = start + (target - start) * Math.min(1, (now - began) / 500);
+        if (progress !== null && car.observation.kind === 'position' && !reduced) {
+          if (car.observation.provenance === 'reported' && car.status === 'running') {
+            // Coarse live reports glide forward at the field's measured pace
+            // instead of sitting at segment midpoints. See liveMotion.ts.
+            const seen = motion.current.get(car.id);
+            const state =
+              !seen || seen.atRace !== car.observation.at
+                ? observeReport(seen ?? null, progress, car.observation.at, fleet.current)
+                : seen;
+            motion.current.set(car.id, state);
+            progress = renderProgress(state, time);
+          } else if (before && car.status === 'running') {
+            const prior = before.entries.find((e) => e.id === car.id);
+            if (
+              prior?.observation.kind === 'position' &&
+              prior.observation.at !== car.observation.at &&
+              car.observation.at - prior.observation.at < 20000
+            ) {
+              const start = prior.observation.progress,
+                target = unwrapForward(start, progress);
+              if (target - start >= 0 && target - start < 0.3)
+                progress = start + (target - start) * Math.min(1, (now - began) / 500);
+            }
           }
         }
         if (progress === null) {
@@ -379,7 +390,7 @@ export const CircuitMap = memo(function CircuitMap({ large = false }: { large?: 
       </div>
       <p className="map-note">
         {snapshot?.source === 'live'
-          ? 'Live positions are coarse timing-feed segments, not GPS — markers sit at segment midpoints and fade as reports age. '
+          ? 'Live positions are coarse timing-feed segments, not GPS — markers glide between reports at the field’s measured pace and fade as reports age. '
           : null}
         {trackGeometryNotice}. Close car labels are offset for readability.{' '}
         <a href={trackAttribution.url} target="_blank" rel="noreferrer">
