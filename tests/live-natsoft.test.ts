@@ -22,6 +22,7 @@ import {
 } from '../src/providers/live/adapter';
 import { IncidentDetector } from '../src/providers/live/incidents';
 import { snapshotSchema } from '../src/domain/schema';
+import { currentLapTime } from '../src/domain/format';
 import { shouldBootLive } from '../src/state/runtime';
 import { SessionController } from '../src/state/controller';
 import { useRace } from '../src/state/store';
@@ -218,6 +219,11 @@ describe('natsoft snapshot adapter', () => {
 });
 
 describe('incident detector', () => {
+  it('sums in-progress sectors into the ticking current lap time', () => {
+    expect(currentLapTime({ currentSectors: [126235, 91707, null] })).toBe(217942);
+    expect(currentLapTime({ currentSectors: [null, null, null] })).toBeNull();
+    expect(currentLapTime({ currentSectors: [90000, 0, null] })).toBe(90000);
+  });
   it('boots live by default, demo only when asked or offline', () => {
     expect(shouldBootLive('', true)).toBe(true);
     expect(shouldBootLive('?live', true)).toBe(true);

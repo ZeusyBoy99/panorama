@@ -10,6 +10,16 @@ export function lapTime(ms: number | null) {
     String(r % 1000).padStart(3, '0')
   );
 }
+/**
+ * In-progress lap time: the sum of this lap's completed sector durations.
+ * Ticks with each snapshot while the lap is underway; null before the first
+ * sector lands. Never a claim about the unfinished remainder of the lap.
+ */
+export function currentLapTime(e: Pick<Entry, 'currentSectors'>): number | null {
+  const parts = e.currentSectors.filter((s): s is number => s !== null && s > 0);
+  if (!parts.length) return null;
+  return parts.reduce((a, b) => a + b, 0);
+}
 export function gapText(gap: Gap) {
   switch (gap.kind) {
     case 'leader':

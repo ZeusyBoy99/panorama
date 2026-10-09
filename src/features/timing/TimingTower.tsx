@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useRace, useUI } from '../../state/store';
-import { bestRaceLap, driverName, gapText, lapTime, standings } from '../../domain/format';
+import { bestRaceLap, currentLapTime, driverName, gapText, lapTime, standings } from '../../domain/format';
 import { Icon } from '../../components/Icon';
 export function TimingTower() {
   const friendly = useUI((s) => s.preferences.uiStyle) === 'fan';
@@ -14,7 +14,8 @@ export function TimingTower() {
   const setPref = useUI((s) => s.setPreferences);
   const cars = standings(snapshot, search, preferences.favourites, only),
     best = bestRaceLap(snapshot);
-  // Phones always show best lap plus gap (race) or last lap (practice/qualifying).
+  // Phones always show best lap plus gap (race) or the ticking current
+  // lap time (practice/qualifying).
   const nonRace = snapshot?.session.type === 'practice' || snapshot?.session.type === 'qualifying';
   const previous = useRef(new Map<string, number | null>());
   const [changes, setChanges] = useState<Record<string, number>>({});
@@ -98,6 +99,9 @@ export function TimingTower() {
             <th className="last-col" scope="col">
               {friendly ? 'Last lap' : 'LAST LAP'}
             </th>
+            <th className="current-col" scope="col">
+              {friendly ? 'Current' : 'CURRENT'}
+            </th>
             <th className="best-col" scope="col">
               {friendly ? 'Best lap' : 'BEST LAP'}
             </th>
@@ -172,6 +176,7 @@ export function TimingTower() {
               >
                 {lapTime(e.lastLap)}
               </td>
+              <td className="current-col lap">{lapTime(currentLapTime(e))}</td>
               <td
                 className={
                   'best-col lap ' +

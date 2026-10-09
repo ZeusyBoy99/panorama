@@ -57,8 +57,7 @@ describe('live dead reckoning', () => {
     expect(fleet).toHaveLength(1);
     expect(m.rate).toBe(rate);
   });
-  it('lends the fleet pace to cars with no history yet', () => {
-    const fleet: LegStats[] = [{ delta: 1 / 7, dur: 21_000 }];
+  it('lends the fleet pace to cars with no history yet', () => {    const fleet: LegStats[] = [{ delta: 1 / 7, dur: 21_000 }];
     const m = observeReport(null, 0.5, 0, fleet);
     expect(m.rate).toBeCloseTo(1 / 7 / 21_000, 10);
     const fresh = observeReport(null, 0.5, 0, []);
