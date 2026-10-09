@@ -1929,8 +1929,16 @@ main {
   .gap-toggle svg {
     width: 13px;
   }
-  .timing-table .desktop-col,
+  .timing-table .last-col,
   .timing-table .wide-col {
+    display: none;
+  }
+  /* Phones keep best lap always, plus gap for races or last lap for
+     practice/qualifying (see session-nonrace on the table). */
+  .timing-table.session-nonrace .last-col {
+    display: table-cell;
+  }
+  .timing-table.session-nonrace .gap-col {
     display: none;
   }
   .timing-table th {

@@ -14,6 +14,8 @@ export function TimingTower() {
   const setPref = useUI((s) => s.setPreferences);
   const cars = standings(snapshot, search, preferences.favourites, only),
     best = bestRaceLap(snapshot);
+  // Phones always show best lap plus gap (race) or last lap (practice/qualifying).
+  const nonRace = snapshot?.session.type === 'practice' || snapshot?.session.type === 'qualifying';
   const previous = useRef(new Map<string, number | null>());
   const [changes, setChanges] = useState<Record<string, number>>({});
   const rankTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -79,12 +81,12 @@ export function TimingTower() {
               : 'Interval'}
         </button>
       </div>
-      <table className="timing-table">
+      <table className={'timing-table ' + (nonRace ? 'session-nonrace' : 'session-race')}>
         <thead>
           <tr>
             <th scope="col">{friendly ? 'Pos.' : 'POS'}</th>
             <th scope="col">{friendly ? 'Car & driver' : 'CAR / DRIVER'}</th>
-            <th scope="col">
+            <th className="gap-col" scope="col">
               {preferences.gapMode === 'gap'
                 ? friendly
                   ? 'Gap'
@@ -93,10 +95,10 @@ export function TimingTower() {
                   ? 'Ahead'
                   : 'INT.'}
             </th>
-            <th className="desktop-col" scope="col">
+            <th className="last-col" scope="col">
               {friendly ? 'Last lap' : 'LAST LAP'}
             </th>
-            <th className="wide-col" scope="col">
+            <th className="best-col" scope="col">
               {friendly ? 'Best lap' : 'BEST LAP'}
             </th>
             <th className="wide-col" scope="col">
@@ -155,12 +157,12 @@ export function TimingTower() {
                   </span>
                 </button>
               </td>
-              <td className={'gap ' + (e.gap.kind === 'leader' ? 'leader' : '')}>
+              <td className={'gap gap-col ' + (e.gap.kind === 'leader' ? 'leader' : '')}>
                 {gapText(preferences.gapMode === 'gap' ? e.gap : e.interval)}
               </td>
               <td
                 className={
-                  'desktop-col lap ' +
+                  'last-col lap ' +
                   (e.lastLap !== null && e.lastLap > 0 && e.lastLap === best
                     ? 'race-best'
                     : e.lastLap !== null && e.lastLap > 0 && e.lastLap === e.bestLap
@@ -172,7 +174,7 @@ export function TimingTower() {
               </td>
               <td
                 className={
-                  'wide-col lap ' +
+                  'best-col lap ' +
                   (e.bestLap !== null && e.bestLap > 0 && e.bestLap === best ? 'race-best' : '')
                 }
               >
@@ -220,7 +222,14 @@ export function TimingTower() {
         <span>
           <i className="legend-dot green" /> Personal best
         </span>
-        <span className="muted">24 demo cars</span>
+        <span className="muted">
+          {snapshot?.entries.length ?? 0}{' '}
+          {snapshot?.source === 'live'
+            ? 'live cars'
+            : snapshot?.source === 'replay'
+              ? 'replay cars'
+              : 'demo cars'}
+        </span>
       </div>
     </section>
   );
