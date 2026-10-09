@@ -51,7 +51,8 @@ No server adapter was needed. If a future meeting requires authentication or
 blocks sockets, add a same-origin relay that allowlists one
 scheme/host/path, revalidates redirects, keeps secrets server-side, shares
 one upstream connection and republishes validated snapshots — never a
-generic fetch proxy.
+generic fetch proxy. The app upgrades `ws://` to `wss://` whenever it is
+served over HTTPS (browsers block insecure sockets from secure pages).
 
 ## Behaviour and limits
 

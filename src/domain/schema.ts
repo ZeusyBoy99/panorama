@@ -124,6 +124,8 @@ export const snapshotSchema = z
       trackId: id,
       type: z.enum(['race', 'practice', 'qualifying']),
       raceLaps: z.number().int().positive(),
+      /** True when the session runs to time (or laps are unbounded, e.g. practice): raceLaps is then only a fallback, not a scheduled distance. Live only. */
+      timed: z.boolean().optional(),
       trackKm: z.number().positive().nullable(),
       phase: z.enum(['pre-race', 'running', 'suspended', 'finished', 'unknown']),
       trackStatus: z.enum(['green', 'yellow', 'safety-car', 'red', 'chequered', 'unknown']),

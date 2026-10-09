@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
-import { decodePacket, encodePacket, resolveTimingUrl } from '../src/providers/live/decode';
+import { decodePacket, encodePacket, resolveTimingUrl, upgradeToSecureSocket } from '../src/providers/live/decode';
 import {
   applyPacket,
   childElements,
@@ -53,6 +53,11 @@ describe('natsoft transport decoding', () => {
     expect(() => resolveTimingUrl('http://user:pass@a.com/y')).toThrow();
     expect(() => resolveTimingUrl('ftp://a.com/y')).toThrow();
     expect(() => resolveTimingUrl('not a url')).toThrow();
+  });
+  it('upgrades insecure sockets on secure pages (mixed-content rule)', () => {
+    expect(upgradeToSecureSocket('ws://h:8080/x', 'https:')).toBe('wss://h:8080/x');
+    expect(upgradeToSecureSocket('ws://h:8080/x', 'http:')).toBe('ws://h:8080/x');
+    expect(upgradeToSecureSocket('wss://h:8080/x', 'https:')).toBe('wss://h:8080/x');
   });
 });
 
@@ -136,6 +141,9 @@ describe('natsoft snapshot adapter', () => {
     expect(s.session.phase).toBe('running');
     expect(s.session.elapsed).toBe(887000);
     expect(s.session.remaining).toBe(133000);
+    // Timed sprint (no scheduled laps): no lap total is claimed.
+    expect(s.session.timed).toBe(true);
+    expect(s.session.raceLaps).toBe(2);
     expect(s.session.capabilities.positionSamples).toBe(true);
     expect(s.session.capabilities.sectorCrossings).toBe(false);
     expect(s.session.capabilities.lapCrossings).toBe(false);
@@ -154,6 +162,19 @@ describe('natsoft snapshot adapter', () => {
     expect(s.entries.every((e) => e.lastCrossing === null)).toBe(true);
     // A fresh build emits no incident alerts.
     expect(s.events.some((e) => e.message.startsWith('Possible incident'))).toBe(false);
+  });
+  it('uses the feed’s scheduled lap total when one is given', () => {
+    const state = emptyState();
+    applyPacket(state, fixture('new.xml'));
+    applyPacket(state, lines('countdown.xml')[0]);
+    applyPacket(state, fixture('full-late.xml'));
+    applyPacket(
+      state,
+      '<E C="R3" D="2026 TOYOTA GAZOO Racing Australia GR CUP - Race 1" Y="Race" MP="N" MPD="0" L="161" TY="" ST="0" RY="Race" RI="0.0000" RD="0" RC="" RS="" RV="" />',
+    );
+    const snapshot = new NatsoftAdapter('test', 'sched').build(state)!;
+    expect(snapshot.session.raceLaps).toBe(161);
+    expect(snapshot.session.timed).toBe(false);
   });
   it('is accepted by the session controller as a live source', () => {
     useRace.setState({ snapshot: null, rejected: 0, accepted: 0, validationError: null });

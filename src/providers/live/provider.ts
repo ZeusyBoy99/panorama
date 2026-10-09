@@ -19,7 +19,7 @@
 
 import type { Snapshot } from '../../domain/schema';
 import type { ProviderStatus, TimingProvider } from '../contract';
-import { decodePacket, resolveTimingUrl } from './decode';
+import { decodePacket, resolveTimingUrl, upgradeToSecureSocket } from './decode';
 import { applyPacket, emptyState, type LiveFeedState } from './state';
 import { LIVE_CAPABILITIES, NatsoftAdapter } from './adapter';
 
@@ -60,7 +60,9 @@ export class NatsoftLiveProvider implements TimingProvider {
   constructor(pageUrl: string) {
     const resolved = resolveTimingUrl(pageUrl);
     this.pageUrl = resolved.pageUrl;
-    this.socketUrl = resolved.socketUrl;
+    const pageProtocol =
+      typeof window !== 'undefined' ? window.location.protocol : 'https:';
+    this.socketUrl = upgradeToSecureSocket(resolved.socketUrl, pageProtocol);
     this.adapter = new NatsoftAdapter(fileSlug(this.pageUrl), 'live');
   }
 

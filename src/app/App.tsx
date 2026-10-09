@@ -59,6 +59,17 @@ function Header() {
   const sessionType = snapshot?.session.type;
   const raceLaps = snapshot?.session.raceLaps ?? 161;
   const remaining = snapshot?.session.remaining ?? null;
+  const timed = snapshot?.session.timed ?? false;
+  const elapsed = snapshot?.session.elapsed ?? 0;
+  const leaderLaps = snapshot?.session.leaderLaps ?? 0;
+  // Timed sessions (sprints to a clock, practice) have no lap total: show
+  // time-based progress instead of a lap fraction. Otherwise use laps.
+  const progress =
+    timed && remaining !== null && elapsed + remaining > 0
+      ? Math.min(100, (elapsed / (elapsed + remaining)) * 100)
+      : !timed && raceLaps > 0
+        ? Math.min(100, (leaderLaps / raceLaps) * 100)
+        : null;
   return (
     <>
       <header className="topbar">
@@ -175,14 +186,16 @@ function Header() {
             </small>
           </div>
           <div className="race-lap">
-            <span>{friendly ? 'Leader’s lap' : 'LAP'}</span>
+            <span>{friendly ? (timed ? 'Laps' : 'Leader’s lap') : 'LAP'}</span>
             <strong>
               {snapshot?.session.leaderLaps ?? '—'}
-              <small> / {raceLaps}</small>
+              {!timed && <small> / {raceLaps}</small>}
             </strong>
-            <div className="progress-track">
-              <i style={{ width: Math.min(100, ((snapshot?.session.leaderLaps ?? 0) / raceLaps) * 100) + '%' }} />
-            </div>
+            {progress !== null && (
+              <div className="progress-track">
+                <i style={{ width: progress + '%' }} />
+              </div>
+            )}
           </div>
           <div className="race-clock">
             <span>{friendly ? 'Race time' : 'RACE TIME'}</span>

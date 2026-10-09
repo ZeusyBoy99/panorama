@@ -182,9 +182,20 @@ export class NatsoftAdapter {
     this.pitsChanged.clear();
     const leaderLaps = Math.max(0, ...rows.map((r) => num(r.data['L'])));
     const scheduled = Number(state.eventLaps);
-    const raceLaps =
+    const lapsCountdown =
       state.clock?.kind === 'L' && state.clock.value !== ''
-        ? Math.max(1, leaderLaps + Math.max(0, Math.round(Number(state.clock.value))))
+        ? Math.max(0, Math.round(Number(state.clock.value)))
+        : null;
+    const lapsKnown =
+      (Number.isFinite(scheduled) && scheduled > 0) ||
+      (lapsCountdown !== null && Number.isFinite(lapsCountdown));
+    const type = mapSessionType(state.eventKind);
+    // Timed sessions (sprints to a clock, practice, qualifying) have no
+    // scheduled lap total: raceLaps below is only a structural fallback.
+    const timed = type !== 'race' || !lapsKnown;
+    const raceLaps =
+      lapsCountdown !== null
+        ? Math.max(1, leaderLaps + lapsCountdown)
         : Number.isFinite(scheduled) && scheduled > 0
           ? Math.floor(scheduled)
           : Math.max(1, leaderLaps);
@@ -299,7 +310,6 @@ export class NatsoftAdapter {
       }
     }
 
-    const type = mapSessionType(state.eventKind);
     const season = parseSeason(state.meetingName, state.eventName);
     return {
       schemaVersion: 1,
@@ -320,6 +330,7 @@ export class NatsoftAdapter {
         trackId: trackCode === 'moun' ? 'mount-panorama' : 'natsoft-' + trackCode,
         type,
         raceLaps,
+        timed,
         trackKm: trackCode === 'moun' ? 6.213 : null,
         phase,
         trackStatus,

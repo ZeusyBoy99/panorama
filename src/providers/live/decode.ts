@@ -56,6 +56,19 @@ export interface ResolvedTimingUrl {
 export const DEFAULT_LIVE_URL = 'http://server.natsoft.com.au:8080/LiveMeeting/20261011.MOUN';
 
 /**
+ * Browsers block insecure `ws://` sockets from `https://` pages (mixed
+ * content), so a secure page must talk `wss://` even when the saved meeting
+ * URL starts with `http://`. The Natsoft server accepts TLS on the same
+ * port, verified against the real feed.
+ */
+export function upgradeToSecureSocket(socketUrl: string, pageProtocol: string): string {
+  if (pageProtocol === 'https:' && socketUrl.toLowerCase().startsWith('ws://')) {
+    return 'wss://' + socketUrl.slice('ws://'.length);
+  }
+  return socketUrl;
+}
+
+/**
  * Resolve a user-supplied Natsoft timing page URL to its WebSocket endpoint.
  * Accepts http(s) page URLs (converted to ws(s) like the official client, which
  * honours ?ConnectTo= overrides) and raw ws(s) URLs. Rejects credentials,
