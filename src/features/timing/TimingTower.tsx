@@ -161,7 +161,8 @@ export function TimingTower() {
                     <span>
                       {mfr ? (
                         <>
-                          <ManufacturerBadge vehicle={e.team.name} /> {mfr.model || mfr.brand}
+                          <ManufacturerBadge vehicle={e.team.name} />{' '}
+                          <span className="mfr-model">{mfr.model || mfr.brand}</span>
                         </>
                       ) : (
                         e.team.name

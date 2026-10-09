@@ -1,10 +1,15 @@
+import { useState } from 'react';
+
 /**
  * Manufacturer badge.
  *
- * Shows the car maker (Toyota, Ford, Chevrolet…) as a small text pill parsed
- * from the vehicle name. Deliberately text, not the car makers' trademarked
- * logo artwork. Returns null for independent/fictional team names so demo
- * entries render exactly as before.
+ * Shows the car maker's real emblem (Toyota wordmark, Ford blue oval,
+ * Chevrolet bowtie) bundled locally under public/manufacturers/, sourced
+ * from Wikimedia Commons file descriptions (Toyota logo.svg, Ford Motor
+ * Company Logo.svg, Chevrolet bowtie 2023.svg). Marks belong to their makers
+ * and are used purely to identify which brand each entry races for. Makers
+ * without a bundled emblem fall back to a text pill; independent/fictional
+ * team names render nothing so demo entries look exactly as before.
  */
 export interface Manufacturer {
   brand: string;
@@ -27,6 +32,11 @@ const MAKES: { match: RegExp; brand: string; short: string }[] = [
   { match: /porsche/i, brand: 'Porsche', short: 'PORSCHE' },
   { match: /volvo/i, brand: 'Volvo', short: 'VOLVO' },
 ];
+const EMBLEMS: Partial<Record<string, string>> = {
+  Toyota: 'toyota.svg',
+  Ford: 'ford.svg',
+  Chevrolet: 'chevrolet.svg',
+};
 export function manufacturerOf(vehicle: string): Manufacturer | null {
   const found = MAKES.find((m) => m.match.test(vehicle));
   if (!found) return null;
@@ -35,10 +45,23 @@ export function manufacturerOf(vehicle: string): Manufacturer | null {
 }
 export function ManufacturerBadge({ vehicle }: { vehicle: string }) {
   const mfr = manufacturerOf(vehicle);
+  const [failed, setFailed] = useState(false);
   if (!mfr) return null;
+  const emblem = EMBLEMS[mfr.brand];
+  if (!emblem || failed) {
+    return (
+      <span className="mfr-badge" title={mfr.brand}>
+        {mfr.short}
+      </span>
+    );
+  }
   return (
-    <span className="mfr-badge" title={mfr.brand}>
-      {mfr.short}
+    <span className="mfr-mark" title={mfr.brand}>
+      <img
+        src={'/manufacturers/' + emblem}
+        alt={mfr.brand + ' logo'}
+        onError={() => setFailed(true)}
+      />
     </span>
   );
 }

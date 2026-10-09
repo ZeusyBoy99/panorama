@@ -73,6 +73,9 @@ function Header() {
         : null;
   return (
     <>
+      {(track === 'yellow' || track === 'safety-car' || track === 'red') && (
+        <div className={'flag-strip ' + track} aria-hidden="true" />
+      )}
       <header className="topbar">
         <NavLink to="/" className="brand" aria-label="Panorama home">
           <span className="brand-mark">

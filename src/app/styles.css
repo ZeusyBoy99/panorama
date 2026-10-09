@@ -650,6 +650,22 @@ main {
   margin-right: 5px;
   white-space: nowrap;
 }
+/* Real emblem on a light chip so it reads on both themes. */
+.mfr-mark {
+  display: inline-flex;
+  align-items: center;
+  background: #f4f6f8;
+  border-radius: 3px;
+  padding: 2px 5px;
+  margin-right: 5px;
+  vertical-align: -3px;
+}
+.mfr-mark img {
+  height: 13px;
+  width: auto;
+  max-width: 58px;
+  display: block;
+}
 .gap {
   font-size: 12px;
   color: var(--text);
@@ -1546,6 +1562,23 @@ main {
   color: var(--accent);
   margin: 0 5px;
 }
+/* Full-width flag strip: unmissable track-status signal, no emoji. */
+.flag-strip {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  z-index: 60;
+  pointer-events: none;
+}
+.flag-strip.yellow,
+.flag-strip.safety-car {
+  background: var(--amber);
+}
+.flag-strip.red {
+  background: var(--danger);
+}
 .pwa-toast {
   position: fixed;
   left: 50%;
@@ -1986,8 +2019,12 @@ main {
   }
   .timing-table td:last-child,
   .timing-table th:last-child {
-    padding-right: 6px;
-    width: 32px;
+    display: none;
+  }
+  /* Starring happens from the tapped row's details panel on phones, so the
+     whole star column steps aside for gap/split/best. */
+  .mfr-model {
+    display: none;
   }
   .timing-table .position {
     font-size: 14px;
