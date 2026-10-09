@@ -54,7 +54,8 @@ function Header() {
       : Math.max(0, now - snapshot.receiptTimestamp);
   const stale = !status.paused && age > 3000;
   const track = snapshot?.session.trackStatus ?? 'unknown';
-  const live = snapshot?.source === 'live';
+  const liveProvider = useRuntime((s) => s.provider?.id === 'live');
+  const live = snapshot?.source === 'live' || liveProvider;
   const sessionType = snapshot?.session.type;
   const raceLaps = snapshot?.session.raceLaps ?? 161;
   const remaining = snapshot?.session.remaining ?? null;
@@ -103,7 +104,9 @@ function Header() {
                 ? 'LIVE — NATSOFT FEED'
                 : snapshot?.source === 'replay'
                   ? 'REPLAY — SIMULATED DATA'
-                  : 'DEMO — SIMULATED DATA'}
+                  : liveProvider
+                    ? 'LIVE — CONNECTING'
+                    : 'DEMO — SIMULATED DATA'}
             </span>
             {live && sessionType && (
               <span className="source-badge">
@@ -118,7 +121,7 @@ function Header() {
           </div>
           <h1>
             {live ? (
-              snapshot?.session.name ?? 'Live timing'
+              (snapshot?.session.name ?? 'Live timing')
             ) : (
               <>
                 Bathurst <span>1000</span>
@@ -128,9 +131,11 @@ function Header() {
           <p>
             {live ? (
               <>
-                {[snapshot?.session.series, snapshot?.session.meeting]
-                  .filter(Boolean)
-                  .join(' · ') || 'Live session'}
+                {snapshot
+                  ? [snapshot.session.series, snapshot.session.meeting]
+                      .filter(Boolean)
+                      .join(' · ') || 'Live session'
+                  : 'Connecting to the timing feed…'}
               </>
             ) : (
               <>
@@ -243,7 +248,8 @@ function Header() {
 }
 function LiveFooter() {
   const snapshot = useRace((s) => s.snapshot);
-  if (snapshot?.source === 'live')
+  const liveProvider = useRuntime((s) => s.provider?.id === 'live');
+  if (snapshot?.source === 'live' || liveProvider)
     return <span>Live timing · Natsoft Race Results · Positions are coarse track segments</span>;
   return <span>Fictional demo · OpenStreetMap circuit geometry · No official affiliation</span>;
 }
