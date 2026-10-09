@@ -1,5 +1,6 @@
 import { memo, useEffect, useRef, useState } from 'react';
 import { useRace, useUI } from '../../state/store';
+import { useRuntime } from '../../state/runtime';
 import { useReducedMotion } from '../../app/hooks';
 import {
   trackPath,
@@ -25,6 +26,10 @@ export const CircuitMap = memo(function CircuitMap({ large = false }: { large?: 
   const selected = useUI((s) => s.selectedId);
   const favourites = useUI((s) => s.preferences.favourites);
   const select = useUI((s) => s.select);
+  // Live mode applies even before the first snapshot: with no session on
+  // the feed there is nothing to show, but demo furniture must not appear.
+  const liveMode =
+    useRuntime((s) => s.provider?.id === 'live') || snapshot?.source === 'live';
   const reduced = useReducedMotion();
   const svg = useRef<SVGSVGElement>(null);
   const nodes = useRef(new Map<string, SVGGElement>());
@@ -273,8 +278,8 @@ export const CircuitMap = memo(function CircuitMap({ large = false }: { large?: 
                 {l.name}
               </text>
             ))}
-            {snapshot?.source === 'live' && snapshot.session.sectorLabels
-              ? snapshot.session.sectorLabels.map((l) => {
+            {liveMode
+              ? (snapshot?.session.sectorLabels ?? []).map((l) => {
                   const pt = pointAt(l.progress, false);
                   return (
                     <g key={l.name}>
@@ -392,7 +397,7 @@ export const CircuitMap = memo(function CircuitMap({ large = false }: { large?: 
         </div>
       )}
       <div className="map-legend">
-        {snapshot?.source !== 'live' && (
+        {!liveMode && (
           <span>
             <i className="legend-dot green" /> Simulated
           </span>

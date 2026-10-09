@@ -119,7 +119,9 @@ function Header() {
                 : snapshot?.source === 'replay'
                   ? 'REPLAY — SIMULATED DATA'
                   : liveProvider
-                    ? 'LIVE — CONNECTING'
+                    ? status.connection === 'error'
+                      ? 'LIVE — UNAVAILABLE'
+                      : 'LIVE — CONNECTING'
                     : 'DEMO — SIMULATED DATA'}
             </span>
             {live && sessionType && (
@@ -149,7 +151,9 @@ function Header() {
                   ? [snapshot.session.series, snapshot.session.meeting]
                       .filter(Boolean)
                       .join(' · ') || 'Live session'
-                  : 'Connecting to the timing feed…'}
+                  : status.connection === 'error'
+                    ? status.message
+                    : 'Connecting to the timing feed…'}
               </>
             ) : (
               <>
