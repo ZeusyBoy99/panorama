@@ -20,6 +20,29 @@ export function currentLapTime(e: Pick<Entry, 'currentSectors'>): number | null 
   if (!parts.length) return null;
   return parts.reduce((a, b) => a + b, 0);
 }
+/**
+ * Which pace badge an in-progress lap earns, judged on the latest completed
+ * sector like a broadcast timing screen: session-best pace (purple) takes
+ * precedence over personal-best pace (green). Anything else, or missing
+ * bests, earns none. The badge follows each sector: it can come and go as
+ * the lap unfolds.
+ */
+export function paceClass(
+  current: readonly (number | null)[],
+  sessionBest: readonly (number | null)[] | undefined,
+  personalBest: readonly (number | null)[] | undefined,
+): 'race-best' | 'personal-best' | '' {
+  let latest = -1;
+  for (let i = 0; i < current.length; i++)
+    if (current[i] !== null && current[i]! > 0) latest = i;
+  if (latest < 0) return '';
+  const c = current[latest]!;
+  const s = sessionBest?.[latest];
+  if (s !== undefined && s !== null && s > 0 && c < s) return 'race-best';
+  const p = personalBest?.[latest];
+  if (p !== undefined && p !== null && p > 0 && c < p) return 'personal-best';
+  return '';
+}
 export function gapText(gap: Gap) {
   switch (gap.kind) {
     case 'leader':

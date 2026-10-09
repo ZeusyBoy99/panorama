@@ -28,6 +28,13 @@ describe('deterministic race and observations', () => {
       expect(c.currentSectors.some((t) => t === null)).toBe(true);
       expect(c.lastLapCrossing?.lap).toBe(c.laps);
     }
+    // Session and personal sector bests are tracked across completed laps.
+    expect(s.session.bestSectors?.every((t) => t !== null && t > 0)).toBe(true);
+    for (const c of s.entries) {
+      expect(c.personalBestSectors?.every((t) => t !== null && t > 0)).toBe(true);
+      for (let i = 0; i < 3; i++)
+        expect(c.personalBestSectors![i]!).toBeGreaterThanOrEqual(s.session.bestSectors![i]!);
+    }
   });
   it.each(['position', 'sector', 'lap', 'classification'] as Profile[])(
     '%s profile exposes only supported data',

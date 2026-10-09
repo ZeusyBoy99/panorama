@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useRace, useUI } from '../../state/store';
-import { bestRaceLap, currentLapTime, driverName, gapText, lapTime, standings } from '../../domain/format';
+import { bestRaceLap, currentLapTime, driverName, gapText, lapTime, paceClass, standings } from '../../domain/format';
 import { Icon } from '../../components/Icon';
 export function TimingTower() {
   const friendly = useUI((s) => s.preferences.uiStyle) === 'fan';
@@ -176,7 +176,9 @@ export function TimingTower() {
               >
                 {lapTime(e.lastLap)}
               </td>
-              <td className="current-col lap">{lapTime(currentLapTime(e))}</td>
+              <td className={'current-col lap ' + paceClass(e.currentSectors, snapshot?.session.bestSectors, e.personalBestSectors)}>
+                {lapTime(currentLapTime(e))}
+              </td>
               <td
                 className={
                   'best-col lap ' +

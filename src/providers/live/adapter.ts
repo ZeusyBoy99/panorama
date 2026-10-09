@@ -329,6 +329,14 @@ export class NatsoftAdapter {
     }
 
     const season = parseSeason(state.meetingName, state.eventName);
+    // Session-best sectors from the feed's own best table (A node); the
+    // source of truth for "on record pace" highlighting.
+    const feedBest = state.sessionBest;
+    const bestSectors: [number | null, number | null, number | null] = [
+      parseTimeSeconds(feedBest?.['S1']),
+      parseTimeSeconds(feedBest?.['S2']),
+      parseTimeSeconds(feedBest?.['S3']),
+    ];
     return {
       schemaVersion: 1,
       sessionId,
@@ -350,6 +358,7 @@ export class NatsoftAdapter {
         raceLaps,
         timed,
         sectorLabels: feedSectorLabels(state),
+        bestSectors,
         trackKm: trackCode === 'moun' ? 6.213 : null,
         phase,
         trackStatus,
@@ -471,6 +480,11 @@ export class NatsoftAdapter {
       currentSector: null,
       previousSectors: [...mem.prevSectors],
       currentSectors: [...sectors],
+      personalBestSectors: [
+        parseTimeSeconds(d['FS1']),
+        parseTimeSeconds(d['FS2']),
+        parseTimeSeconds(d['FS3']),
+      ],
       lastCrossing: null,
       lastLapCrossing: null,
       observation,

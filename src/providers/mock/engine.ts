@@ -45,6 +45,8 @@ interface Car {
   current: Entry['currentSectors'];
   lastLap: number | null;
   best: number | null;
+  /** Fastest completed sector durations for this car. */
+  sectorBest: [number | null, number | null, number | null];
   history: Entry['lapHistory'];
   status: Entry['status'];
   driver: number;
@@ -66,6 +68,8 @@ interface EngineState {
   winner: boolean;
   track: Snapshot['session']['trackStatus'];
   phase: Snapshot['session']['phase'];
+  /** Fastest completed sector durations seen anywhere in the field. */
+  bestSectors: [number | null, number | null, number | null];
 }
 const checkpoints = new Map<string, EngineState>();
 function jitter(seed: number, index: number, lap: number) {
@@ -102,6 +106,7 @@ export class RaceEngine {
         current: [null, null, null],
         lastLap: null,
         best: null,
+        sectorBest: [null, null, null],
         history: [],
         status: 'running',
         driver: 0,
@@ -120,6 +125,7 @@ export class RaceEngine {
       winner: false,
       track: 'green',
       phase: 'running',
+      bestSectors: [null, null, null],
     };
     const cached = checkpoints.get(key);
     if (cached) this.state = structuredClone(cached);
@@ -223,6 +229,13 @@ export class RaceEngine {
       c.best = c.best === null ? last : Math.min(c.best, last);
       c.history.push({ lap: c.laps, time: last, at, valid: true });
       c.history = c.history.slice(-16);
+      for (let s = 0; s < 3; s++) {
+        const sector = c.current[s];
+        if (sector !== null && (this.state.bestSectors[s] === null || sector < this.state.bestSectors[s]!))
+          this.state.bestSectors[s] = sector;
+        if (sector !== null && (c.sectorBest[s] === null || sector < c.sectorBest[s]!))
+          c.sectorBest[s] = sector;
+      }
       c.previous = [...c.current];
       c.current = [null, null, null];
       c.lapStart = at;
@@ -459,6 +472,9 @@ export class RaceEngine {
           : null,
         previousSectors: caps.sectorCrossings ? [...c.previous] : [null, null, null],
         currentSectors: caps.sectorCrossings ? [...c.current] : [null, null, null],
+        personalBestSectors: caps.sectorCrossings
+          ? ([...c.sectorBest] as [number | null, number | null, number | null])
+          : [null, null, null],
         lastCrossing: caps.sectorCrossings ? last : caps.lapCrossings ? lap : null,
         lastLapCrossing: caps.lapCrossings ? lap : null,
         observation,
@@ -506,6 +522,9 @@ export class RaceEngine {
         remaining: null,
         timezone: 'Australia/Sydney',
         capabilities: caps,
+        bestSectors: caps.sectorCrossings
+          ? [...this.state.bestSectors] as [number | null, number | null, number | null]
+          : [null, null, null],
       },
       entries,
       events: this.state.events.map((e) => ({ ...e, entryIds: [...e.entryIds] })),

@@ -79,6 +79,8 @@ export const entrySchema = z.object({
   currentSector: z.number().int().min(0).max(2).nullable(),
   previousSectors: z.tuple([ms.nullable(), ms.nullable(), ms.nullable()]),
   currentSectors: z.tuple([ms.nullable(), ms.nullable(), ms.nullable()]),
+  /** Fastest completed sector durations for this entry; drives personal-best highlighting. */
+  personalBestSectors: z.tuple([ms.nullable(), ms.nullable(), ms.nullable()]).optional(),
   lastCrossing: crossingSchema.nullable(),
   lastLapCrossing: crossingSchema.nullable(),
   observation,
@@ -143,6 +145,8 @@ export const snapshotSchema = z
       remaining: ms.nullable(),
       timezone: z.string().max(80),
       capabilities: capabilitiesSchema,
+      /** Fastest completed sector durations seen in the session; drives "on record pace" highlighting. */
+      bestSectors: z.tuple([ms.nullable(), ms.nullable(), ms.nullable()]).optional(),
     }),
     entries: z.array(entrySchema).min(1).max(100),
     events: z.array(eventSchema).max(100),

@@ -22,7 +22,7 @@ import {
 } from '../src/providers/live/adapter';
 import { IncidentDetector } from '../src/providers/live/incidents';
 import { snapshotSchema } from '../src/domain/schema';
-import { currentLapTime } from '../src/domain/format';
+import { currentLapTime, paceClass } from '../src/domain/format';
 import { shouldBootLive } from '../src/state/runtime';
 import { SessionController } from '../src/state/controller';
 import { useRace } from '../src/state/store';
@@ -174,8 +174,21 @@ describe('natsoft snapshot adapter', () => {
     // A fresh build emits no incident alerts.
     expect(s.events.some((e) => e.message.startsWith('Possible incident'))).toBe(false);
   });
-  it('uses the feed’s scheduled lap total when one is given', () => {
+  it('maps session and personal best sectors from the feed', () => {
     const state = emptyState();
+    applyPacket(state, fixture('new.xml'));
+    applyPacket(state, lines('countdown.xml')[0]);
+    applyPacket(state, fixture('full-late.xml'));
+    applyPacket(
+      state,
+      '<A T="1791546059.3640" Y="p" I2="217.8610" S2="91.4978" S1="126.0526" S3="78.2668" />',
+    );
+    const snapshot = new NatsoftAdapter('test', 'bests').build(state)!;
+    expect(snapshot.session.bestSectors).toEqual([126053, 91498, 78267]);
+    const leader = snapshot.entries[0];
+    expect(leader.personalBestSectors).toEqual([126235, 40204, 78267]);
+  });
+  it('uses the feed’s scheduled lap total when one is given', () => {    const state = emptyState();
     applyPacket(state, fixture('new.xml'));
     applyPacket(state, lines('countdown.xml')[0]);
     applyPacket(state, fixture('full-late.xml'));
@@ -223,6 +236,18 @@ describe('incident detector', () => {
     expect(currentLapTime({ currentSectors: [126235, 91707, null] })).toBe(217942);
     expect(currentLapTime({ currentSectors: [null, null, null] })).toBeNull();
     expect(currentLapTime({ currentSectors: [90000, 0, null] })).toBe(90000);
+  });
+  it('grades record pace purple before personal pace green', () => {
+    const session = [126000, 40000, 78000];
+    const personal = [127000, 41000, 79000];
+    // Latest completed sector decides, like a broadcast screen.
+    expect(paceClass([125000, null, null], session, personal)).toBe('race-best');
+    expect(paceClass([125000, 40500, null], session, personal)).toBe('personal-best');
+    expect(paceClass([125000, 41500, null], session, personal)).toBe('');
+    expect(paceClass([126000, null, null], session, personal)).toBe('personal-best');
+    expect(paceClass([null, null, null], session, personal)).toBe('');
+    expect(paceClass([125000, null, null], [null, null, null], personal)).toBe('personal-best');
+    expect(paceClass([125000, null, null], undefined, undefined)).toBe('');
   });
   it('boots live by default, demo only when asked or offline', () => {
     expect(shouldBootLive('', true)).toBe(true);
