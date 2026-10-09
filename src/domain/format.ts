@@ -21,6 +21,18 @@ export function currentLapTime(e: Pick<Entry, 'currentSectors'>): number | null 
   return parts.reduce((a, b) => a + b, 0);
 }
 /**
+ * Time spent in the pits so far, in milliseconds of race clock. Counts from
+ * the pit-entry observation while the car is still flagged as pitting;
+ * null otherwise (including after the exit observation).
+ */
+export function pitDwellMs(
+  e: Pick<Entry, 'status' | 'pitObservation'>,
+  elapsed: number,
+): number | null {
+  if (e.status !== 'pit' || !e.pitObservation || e.pitObservation.kind === 'exit') return null;
+  return Math.max(0, elapsed - e.pitObservation.at);
+}
+/**
  * Which pace badge an in-progress lap earns, judged on the latest completed
  * sector like a broadcast timing screen: session-best pace (purple) takes
  * precedence over personal-best pace (green). Anything else, or missing

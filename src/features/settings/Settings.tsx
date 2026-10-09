@@ -205,38 +205,42 @@ export function Settings({
         <div className="panel-heading">
           <div>
             <span className="eyebrow">DATA SOURCE</span>
-            <h2>Demo & replay</h2>
+            <h2>{liveActive ? 'Replay & live' : 'Demo & replay'}</h2>
           </div>
           <Icon name="radio" />
         </div>
         <div className="settings-body">
-          <p>
-            The simulator is available offline. Fictional drivers and entries are independent of the
-            official 2026 field.
-          </p>
-          <div className="source-actions">
-            <button className="button" onClick={() => startDemo()}>
-              <Icon name="play" />
-              Demo simulator
-            </button>
-            <button
-              className="button"
-              onClick={() => {
-                void loadFixture()
-                  .then(() => {
-                    setSuccess('Bundled replay loaded');
-                    setError('');
-                  })
-                  .catch((e) => setError(String(e)));
-              }}
-            >
-              Load sample replay
-            </button>
-            <button className="button" onClick={() => useUI.setState({ controlsOpen: true })}>
-              <Icon name="controls" />
-              {prefs.uiStyle === 'fan' ? 'Open demo controls' : 'Open race lab'}
-            </button>
-          </div>
+          {!liveActive && (
+            <>
+              <p>
+                The simulator is available offline. Fictional drivers and entries are independent
+                of the official 2026 field.
+              </p>
+              <div className="source-actions">
+                <button className="button" onClick={() => startDemo()}>
+                  <Icon name="play" />
+                  Demo simulator
+                </button>
+                <button
+                  className="button"
+                  onClick={() => {
+                    void loadFixture()
+                      .then(() => {
+                        setSuccess('Bundled replay loaded');
+                        setError('');
+                      })
+                      .catch((e) => setError(String(e)));
+                  }}
+                >
+                  Load sample replay
+                </button>
+                <button className="button" onClick={() => useUI.setState({ controlsOpen: true })}>
+                  <Icon name="controls" />
+                  {prefs.uiStyle === 'fan' ? 'Open demo controls' : 'Open race lab'}
+                </button>
+              </div>
+            </>
+          )}
           <div className="detail-section">
             <h4>Replay recordings</h4>
             <p className="muted">
@@ -373,8 +377,9 @@ export function Settings({
             <span>Independent · unaffiliated</span>
           </div>
           <p className="muted">
-            All demo timing, telemetry, entries, and events are simulated. Circuit geometry is
-            adapted from OpenStreetMap. Sector and pit-service anchors are demo estimates.
+            {liveActive
+              ? 'Live timing comes from the Natsoft Race Results feed. Map positions are coarse track segments, never GPS.'
+              : 'All demo timing, telemetry, entries, and events are simulated. Circuit geometry is adapted from OpenStreetMap. Sector and pit-service anchors are demo estimates.'}
           </p>
         </div>
       </section>

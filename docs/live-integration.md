@@ -63,10 +63,17 @@ served over HTTPS (browsers block insecure sockets from secure pages).
   `reported` provenance, fading to stale between ~30 s updates). Timed
   support races have no scheduled lap count, so `raceLaps` falls back to the
   leader's laps and the header emphasises remaining time.
-- Possible-incident alerts fire when a car falls 5+ places within 90 s while
-  running (pit stops, opening laps and non-running phases excluded, one
-  alert per car per 3 min). They are labelled derived/possible in the event
-  feed and as a dismissible banner — positions only, never a crash claim.
+- Possible-incident alerts fire only in races, only when a car falls 5+
+  places within 90 s while running, and only once the drop is still there 20
+  s later (pit stops, opening laps and non-running phases excluded, one
+  alert per car per 3 min). Qualifying and practice orders swing
+  legitimately, so drops there never alert. They are labelled
+  derived/possible in the event feed and as a dismissible banner — positions
+  only, never a crash claim.
+- A provider watchdog republishes at least every 2 s so the UI keeps
+  refreshing with honestly growing ages through packet stalls, and
+  resynchronises when a running session goes quiet for 30 s. A finished
+  session going quiet is normal: the last classification stands.
 - Single-driver sprint entries show the driver plus a `—` second slot, as
   the schema requires a driver pair. DNS cars (0 laps once the leader is
   away, zero speed) are `unknown`, not invented retirements.

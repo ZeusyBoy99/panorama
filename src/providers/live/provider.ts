@@ -51,7 +51,10 @@ export class NatsoftLiveProvider implements TimingProvider {
   private attempt = 0;
   private retryTimer: ReturnType<typeof setTimeout> | null = null;
   private publishTimer: ReturnType<typeof setTimeout> | null = null;
+  private watchdogTimer: ReturnType<typeof setInterval> | null = null;
   private lastSnapshot: Snapshot | null = null;
+  private lastPacketMono = 0;
+  private lastPublishMono = 0;
   private connectCount = 0;
   private redirects = 0;
   readonly pageUrl: string;
@@ -105,7 +108,8 @@ export class NatsoftLiveProvider implements TimingProvider {
     this.stopped = true;
     if (this.retryTimer) clearTimeout(this.retryTimer);
     if (this.publishTimer) clearTimeout(this.publishTimer);
-    this.retryTimer = this.publishTimer = null;
+    if (this.watchdogTimer) clearInterval(this.watchdogTimer);
+    this.retryTimer = this.publishTimer = this.watchdogTimer = null;
     this.socket?.close();
     this.socket = null;
     this.status = { connection: 'stopped', message: 'Live timing stopped', paused: false, speed: 1 };
@@ -135,6 +139,7 @@ export class NatsoftLiveProvider implements TimingProvider {
     socket.onmessage = (event) => {
       try {
         const xml = decodePacket(String(event.data));
+        this.lastPacketMono = performance.now();
         const result = applyPacket(this.state, xml);
         if (result.redirect !== undefined) {
           this.followRedirect(result.redirect);
@@ -188,17 +193,46 @@ export class NatsoftLiveProvider implements TimingProvider {
 
   private schedulePublish() {
     if (this.publishTimer || this.stopped) return;
+    if (!this.watchdogTimer) this.watchdogTimer = setInterval(() => this.watchdog(), 2000);
     this.publishTimer = setTimeout(() => {
       this.publishTimer = null;
       if (this.stopped || this.status.connection !== 'connected') return;
-      try {
-        const snapshot = this.adapter.build(this.state);
-        if (snapshot) this.emit(snapshot);
-      } catch {
-        // A transient build failure must not kill the feed; retry next tick.
-        this.schedulePublish();
-      }
+      this.publishNow();
     }, PUBLISH_MS);
+  }
+
+  private publishNow() {
+    try {
+      const snapshot = this.adapter.build(this.state);
+      if (snapshot) {
+        this.lastPublishMono = performance.now();
+        this.emit(snapshot);
+      }
+    } catch {
+      // A transient build failure must not kill the feed; retry next tick.
+      this.schedulePublish();
+    }
+  }
+
+  /**
+   * Watchdog: guarantees the UI keeps refreshing (with honestly growing
+   * ages) even if packets stall, and resynchronises when a running session
+   * goes quiet for 30 s. A finished session going quiet is normal — the
+   * last classification simply stands with its original timestamps.
+   */
+  private watchdog() {
+    if (this.stopped || this.status.connection !== 'connected') return;
+    const now = performance.now();
+    if (now - this.lastPublishMono >= 2000) this.publishNow();
+    const phase = this.adapter.phase;
+    if (
+      this.lastPacketMono > 0 &&
+      now - this.lastPacketMono > 30000 &&
+      phase !== '' &&
+      phase !== 'finished'
+    ) {
+      this.socket?.close();
+    }
   }
 
   private scheduleRetry(message: string) {

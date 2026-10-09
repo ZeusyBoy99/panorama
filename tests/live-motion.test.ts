@@ -10,7 +10,7 @@ import {
 } from '../src/features/map/liveMotion';
 
 describe('live dead reckoning', () => {
-  it('advances between reports at the learned pace and holds at one segment', () => {
+  it('advances between reports at the learned pace and holds after ~2 segments', () => {
     const fleet: LegStats[] = [];
     // Two reports 1/7 of a lap apart over 21 s of race time.
     let m = observeReport(null, 0.5 / 7, 0, fleet);
@@ -18,8 +18,8 @@ describe('live dead reckoning', () => {
     expect(m.rate).toBeCloseTo(1 / 7 / 21_000, 10);
     // Half a leg after the second report: halfway to the next midpoint.
     expect(renderProgress(m, 31_500)).toBeCloseTo(2 / 7, 5);
-    // Far future: clamped one segment past the anchor, never runaway.
-    expect(renderProgress(m, 1_000_000)).toBeCloseTo(2.5 / 7, 5);
+    // Far future: clamped two segments past the anchor, never runaway.
+    expect(renderProgress(m, 1_000_000)).toBeCloseTo(3.5 / 7, 5);
     // Before the report: holds at the anchor.
     expect(renderProgress(m, -5_000)).toBeCloseTo(1.5 / 7, 5);
   });

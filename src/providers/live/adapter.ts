@@ -154,6 +154,10 @@ interface CarMemory {
   pits: number;
   /** First time this car was seen; previous sectors adopt the current values. */
   fresh: boolean;
+  /** Computed entry status at the previous build (pre-finish mapping). */
+  lastStatus: Entry['status'];
+  /** Current pit observation while pitting; exit record after leaving. */
+  pitObs: Entry['pitObservation'];
 }
 
 export class NatsoftAdapter {
@@ -166,6 +170,10 @@ export class NatsoftAdapter {
   private lastBest: number | null = null;
   private lastPhase: Snapshot['session']['phase'] | '' = '';
   private sequence = 0;
+  /** Most recent session phase, for the provider watchdog. */
+  get phase(): Snapshot['session']['phase'] | '' {
+    return this.lastPhase;
+  }
 
   constructor(
     private readonly fileSlug: string,
@@ -232,6 +240,12 @@ export class NatsoftAdapter {
       entries.push(this.buildEntry(state, row, def, id, rank + 1, leaderLaps, elapsedMs, trackCode));
     }
     if (!entries.length) return null;
+
+    // Checkered flag: cars still circulating at the end of the session are
+    // classified finished. Retired/unknown entries keep their state.
+    if (phase === 'finished') {
+      for (const e of entries) if (e.status === 'running') e.status = 'finished';
+    }
 
     const at = elapsedMs;
     const leaderId = entries[0].id;
@@ -300,7 +314,10 @@ export class NatsoftAdapter {
     }
     this.lastPhase = phase;
 
-    const running = phase === 'running';
+    // Incident detection runs on race order only. Qualifying and practice
+    // classifications swing legitimately as times land, so a big drop there
+    // is routine, not evidence of an incident.
+    const running = phase === 'running' && type === 'race';
     for (const e of entries) {
       const alert = this.detector.check(e.id, e.position ?? 99, at, {
         pitting: e.status === 'pit' || this.pitsChanged.has(e.id),
@@ -396,6 +413,8 @@ export class NatsoftAdapter {
       history: [],
       pits: num(d['PS']),
       fresh: true,
+      lastStatus: 'running' as Entry['status'],
+      pitObs: null,
     };
     const sectors: [number | null, number | null, number | null] = [
       parseTimeSeconds(d['S1']),
@@ -432,6 +451,25 @@ export class NatsoftAdapter {
         : laps === 0 && leaderLaps >= 1 && speed === 0
           ? 'unknown'
           : 'running';
+    // Pit entry/exit observations (any non-blank pit flag means the car is
+    // in the lane; observed transitions, never inferred).
+    const wasPitting = mem.lastStatus === 'pit';
+    if (status === 'pit' && !wasPitting) {
+      mem.pitObs = { kind: 'entry', at: elapsedMs, provenance: 'supplied' };
+      if (!this.pitsChanged.has(id)) {
+        this.addEvent({
+          id: 'live-pitin-' + id + '-' + Math.round(elapsedMs / 1000),
+          at: elapsedMs,
+          entryIds: [id],
+          category: 'pit',
+          message: 'Car ' + def.number + ' entered the pits',
+          origin: 'supplied',
+        });
+      }
+    } else if (status !== 'pit' && wasPitting) {
+      mem.pitObs = { kind: 'exit', at: elapsedMs, provenance: 'supplied' };
+    }
+    mem.lastStatus = status;
 
     const ageMs = Math.max(0, Math.round((state.lastT - row.updatedT) * 1000));
     const observedAt = Math.max(0, elapsedMs - ageMs);
@@ -492,7 +530,7 @@ export class NatsoftAdapter {
       observedAt,
       lapHistory: mem.history.map((h) => ({ ...h })),
       stints: [{ driverId: base, fromLap: 0, at: 0 }],
-      pitObservation: null,
+      pitObservation: mem.pitObs,
       penalty: null,
     };
   }

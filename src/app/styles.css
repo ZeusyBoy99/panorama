@@ -631,6 +631,25 @@ main {
 .status-tag.finished {
   color: var(--text);
 }
+/* Whole name plate tints purple while the car is on session-best pace.
+   Personal-best pace colours only the split time, never the plate. */
+.car-select.pace-best {
+  background: color-mix(in srgb, var(--purple) 13%, transparent);
+  border-radius: 6px;
+  box-shadow: inset 2px 0 0 var(--purple);
+}
+.mfr-badge {
+  display: inline-block;
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  padding: 1px 4px;
+  margin-right: 5px;
+  white-space: nowrap;
+}
 .gap {
   font-size: 12px;
   color: var(--text);
@@ -1651,7 +1670,11 @@ main {
     justify-content: end;
   }
   .race-heading {
-    flex-shrink: 0;
+    flex-shrink: 1;
+    min-width: 0;
+  }
+  .race-heading h1 {
+    overflow-wrap: break-word;
   }
   .race-heading p {
     max-width: 290px;
@@ -1942,43 +1965,59 @@ main {
   .timing-table.session-nonrace .gap-col {
     display: none;
   }
+  .timing-table {
+    table-layout: fixed;
+    width: 100%;
+  }
   .timing-table th {
     font-size: 9px;
     height: 30px;
-    padding: 0 5px;
+    padding: 0 3px;
   }
   .timing-table td {
-    padding: 4px 5px;
+    padding: 4px 3px;
     font-size: 12px;
     height: 56px;
   }
   .timing-table td:first-child,
   .timing-table th:first-child {
-    padding-left: 14px;
-    width: 40px;
+    padding-left: 10px;
+    width: 34px;
   }
   .timing-table td:last-child,
   .timing-table th:last-child {
-    padding-right: 8px;
-    width: 38px;
+    padding-right: 6px;
+    width: 32px;
   }
   .timing-table .position {
     font-size: 14px;
   }
   .driver strong {
-    font-size: 13px;
+    font-size: 12px;
+    overflow-wrap: break-word;
   }
   .driver > span {
     font-size: 10px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .driver {
+    min-width: 0;
   }
   .car-select {
-    gap: 9px;
+    gap: 7px;
     min-height: 44px;
   }
   .car-number {
-    width: 31px;
+    width: 30px;
     height: 28px;
     font-size: 12px;
+  }
+  .gap,
+  .lap {
+    white-space: nowrap;
+    font-size: 11px;
   }
   .driver {
     gap: 4px;
@@ -1992,8 +2031,9 @@ main {
     margin-left: 4px;
   }
   .favourite {
-    min-width: 32px;
+    min-width: 28px;
     min-height: 42px;
+    padding: 6px 2px;
   }
   .rank-change {
     font-size: 9px;

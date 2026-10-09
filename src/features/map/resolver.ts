@@ -30,17 +30,27 @@ export function resolvePosition(entry: Entry, snapshot: Snapshot, elapsed: numbe
   if (observation.kind === 'position') {
     const age = Math.max(0, elapsed - observation.at);
     const reported = observation.provenance === 'reported';
+    // Live segment reports never vanish: the marker holds its last honest
+    // spot (gliding at most ~2 segments past it in the renderer) and fades
+    // stale instead of inventing a disappearance.
+    if (reported) {
+      return {
+        progress: observation.progress,
+        pitProgress: observation.pitProgress,
+        provenance: observation.provenance,
+        confidence: age > 3000 ? 'stale' : 'high',
+        age,
+        reason: 'Reported track segment · marker glides between reports',
+      };
+    }
+    const stale = age > 3000;
     return {
       progress: age > 15000 ? null : observation.progress,
       pitProgress: observation.pitProgress,
       provenance: observation.provenance,
-      confidence: age > 3000 ? 'stale' : 'high',
+      confidence: stale ? 'stale' : 'high',
       age,
-      reason: reported
-        ? 'Reported track segment · marker glides between reports'
-        : age > 3000
-          ? 'Position sample is stale'
-          : 'Timestamped simulated position sample',
+      reason: stale ? 'Position sample is stale' : 'Timestamped simulated position sample',
     };
   }
   if (['pit', 'retired', 'stopped', 'finished'].includes(entry.status))

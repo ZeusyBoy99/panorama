@@ -10,7 +10,8 @@
  * - each car's rate is learned from its own recent report intervals
  *   (progress gained per millisecond of race clock);
  * - cars with no history yet borrow the fleet median;
- * - extrapolation never runs past one full segment length, then holds;
+ * - extrapolation runs at most ~2 segments past the last report, then holds
+ *   its ground: markers never hide, never invent extra laps, and fade stale;
  * - implausible jumps (> 35% of a lap), duplicates and over-long gaps such
  *   as pit dwells re-anchor without teaching a bogus pace;
  * - everything runs on the race clock, so pause, caching, replay speed and
@@ -38,7 +39,7 @@ export interface LegStats {
 
 /** One lap per 3 minutes of race time, used before anything is measured. */
 export const FALLBACK_RATE = 1 / 180000;
-const FALLBACK_EXTRA = 0.15;
+const FALLBACK_EXTRA = 0.3;
 /** Larger forward jumps are data glitches, not motion. */
 export const MAX_LEG_JUMP = 0.35;
 /** Intervals outside this window never teach pace (duplicates, pit dwells). */
@@ -82,7 +83,7 @@ export function observeReport(
   if (dur > MIN_LEG_MS && dur <= MAX_LEG_MS && delta > 0 && delta <= MAX_LEG_JUMP) {
     fleet.push({ delta, dur });
     if (fleet.length > 24) fleet.shift();
-    return { anchorU: prev.anchorU + delta, atRace, rate: delta / dur, maxExtra: delta };
+    return { anchorU: prev.anchorU + delta, atRace, rate: delta / dur, maxExtra: delta * 2 };
   }
   if (delta > MAX_LEG_JUMP || delta <= 0 || dur <= 0) {
     return { anchorU: raw, atRace, rate: prev.rate, maxExtra: prev.maxExtra };

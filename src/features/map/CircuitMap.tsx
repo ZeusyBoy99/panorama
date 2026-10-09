@@ -392,9 +392,11 @@ export const CircuitMap = memo(function CircuitMap({ large = false }: { large?: 
         </div>
       )}
       <div className="map-legend">
-        <span>
-          <i className="legend-dot green" /> Simulated
-        </span>
+        {snapshot?.source !== 'live' && (
+          <span>
+            <i className="legend-dot green" /> Simulated
+          </span>
+        )}
         <span>
           <i className="legend-dot white" /> Reported
         </span>

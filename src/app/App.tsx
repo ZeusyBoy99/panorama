@@ -40,6 +40,7 @@ function Header() {
     cached = useRace((s) => s.cached),
     error = useRace((s) => s.validationError),
     storageError = useUI((s) => s.storageError);
+  const liveActive = useRuntime((s) => s.provider?.id === 'live');
   const friendly = useUI((s) => s.preferences.uiStyle) === 'fan';
   const selected = useUI((s) => s.selectedId);
   const route = (pathname: string) => ({
@@ -98,13 +99,15 @@ function Header() {
             <span>Settings</span>
           </NavLink>
         </nav>
-        <button
-          className="button lab-button"
-          onClick={() => useUI.setState({ controlsOpen: true })}
-        >
-          <Icon name="controls" />
-          <span>{friendly ? 'Demo controls' : 'Race lab'}</span>
-        </button>
+        {!liveActive && (
+          <button
+            className="button lab-button"
+            onClick={() => useUI.setState({ controlsOpen: true })}
+          >
+            <Icon name="controls" />
+            <span>{friendly ? 'Demo controls' : 'Race lab'}</span>
+          </button>
+        )}
       </header>
       <div className="race-header">
         <div className="race-heading">

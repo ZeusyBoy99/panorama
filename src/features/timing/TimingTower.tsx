@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useRace, useUI } from '../../state/store';
-import { bestRaceLap, currentLapTime, driverName, gapText, lapTime, paceClass, standings } from '../../domain/format';
+import { bestRaceLap, currentLapTime, driverName, gapText, lapTime, paceClass, pitDwellMs, standings } from '../../domain/format';
+import { ManufacturerBadge, manufacturerOf } from '../../components/ManufacturerBadge';
 import { Icon } from '../../components/Icon';
 export function TimingTower() {
   const friendly = useUI((s) => s.preferences.uiStyle) === 'fan';
@@ -100,7 +101,7 @@ export function TimingTower() {
               {friendly ? 'Last lap' : 'LAST LAP'}
             </th>
             <th className="current-col" scope="col">
-              {friendly ? 'Current' : 'CURRENT'}
+              {friendly ? 'Split' : 'SPLIT'}
             </th>
             <th className="best-col" scope="col">
               {friendly ? 'Best lap' : 'BEST LAP'}
@@ -115,7 +116,14 @@ export function TimingTower() {
           </tr>
         </thead>
         <tbody>
-          {cars.map((e) => (
+          {cars.map((e) => {
+            const dwell = pitDwellMs(e, snapshot?.session.elapsed ?? 0);
+            const dwellText = dwell !== null ? 'PIT +' + lapTime(dwell) : null;
+            // Personal-best pace colours only the split; session-best pace
+            // additionally tints the whole name plate. Never while pitting.
+            const pace = dwell !== null ? '' : paceClass(e.currentSectors, snapshot?.session.bestSectors, e.personalBestSectors);
+            const mfr = manufacturerOf(e.team.name);
+            return (
             <tr
               key={e.id}
               className={
@@ -138,7 +146,7 @@ export function TimingTower() {
               </td>
               <td>
                 <button
-                  className="car-select"
+                  className={'car-select' + (pace === 'race-best' ? ' pace-best' : '')}
                   onClick={() => {
                     select(e.id);
                     if (matchMedia('(max-width:720px)').matches)
@@ -151,10 +159,20 @@ export function TimingTower() {
                   <span className="driver">
                     <strong>{driverName(e)}</strong>
                     <span>
-                      {e.team.name}
+                      {mfr ? (
+                        <>
+                          <ManufacturerBadge vehicle={e.team.name} /> {mfr.model || mfr.brand}
+                        </>
+                      ) : (
+                        e.team.name
+                      )}
                       {e.status !== 'running' && (
                         <b className={'status-tag ' + e.status}>
-                          {e.status === 'pit' ? 'PIT LANE' : e.status.toUpperCase()}
+                          {e.status === 'pit'
+                            ? 'PIT LANE'
+                            : e.status === 'finished'
+                              ? 'FINISHED'
+                              : e.status.toUpperCase()}
                         </b>
                       )}
                     </span>
@@ -162,7 +180,7 @@ export function TimingTower() {
                 </button>
               </td>
               <td className={'gap gap-col ' + (e.gap.kind === 'leader' ? 'leader' : '')}>
-                {gapText(preferences.gapMode === 'gap' ? e.gap : e.interval)}
+                {dwellText ?? gapText(preferences.gapMode === 'gap' ? e.gap : e.interval)}
               </td>
               <td
                 className={
@@ -176,8 +194,8 @@ export function TimingTower() {
               >
                 {lapTime(e.lastLap)}
               </td>
-              <td className={'current-col lap ' + paceClass(e.currentSectors, snapshot?.session.bestSectors, e.personalBestSectors)}>
-                {lapTime(currentLapTime(e))}
+              <td className={'current-col lap ' + pace}>
+                {dwellText ?? lapTime(currentLapTime(e))}
               </td>
               <td
                 className={
@@ -206,7 +224,8 @@ export function TimingTower() {
                 </button>
               </td>
             </tr>
-          ))}
+            );
+          })}
         </tbody>
       </table>
       {!cars.length && (

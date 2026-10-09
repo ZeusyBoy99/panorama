@@ -3,6 +3,7 @@ import { useRace, useUI } from '../../state/store';
 import { clockTime, driverName, gapText, lapTime } from '../../domain/format';
 import { resolvePosition } from '../map/resolver';
 import { Icon } from '../../components/Icon';
+import { ManufacturerBadge } from '../../components/ManufacturerBadge';
 import type { Entry } from '../../domain/schema';
 function Trend({ entry }: { entry: Entry }) {
   const values = entry.lapHistory.filter((l) => l.valid && l.time > 0).slice(-12);
@@ -67,7 +68,9 @@ function Contents({ entry, full = false }: { entry: Entry; full?: boolean }) {
       >
         <div className="large-number">{entry.number}</div>
         <div>
-          <span className="eyebrow">{entry.team.name}</span>
+          <span className="eyebrow">
+            <ManufacturerBadge vehicle={entry.team.name} /> {entry.team.name}
+          </span>
           <h3>{driverName(entry)}</h3>
           <span className="muted">
             {entry.status === 'running' ? 'On track' : entry.status.toUpperCase()} ·{' '}
