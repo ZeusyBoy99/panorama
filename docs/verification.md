@@ -28,7 +28,7 @@ Deterministic seeded clock across cadence/acceleration; valid summed sector timi
 
 ## Browser coverage
 
-Both Chromium 153 and WebKit 26.6 covered the default working 24-car demo, demo labels, driver search, favourite/reload persistence, row/map shared selection, car deep links/navigation, all map profiles, pause, dialog Escape, friendly/Hacker UI switch, theme/reduced motion, pit driver changes, stable favourites, chequered/finished state, real-time outage/recovery, malformed and duplicate data, bundled replay/seek/export/import/errors, and live timing URL checks that make no request on format check and never persist query-string secrets.
+Both Chromium 153 and WebKit 26.6 covered the demo (pinned via `?demo` now that live is the default boot), demo labels, driver search, favourite/reload persistence, row/map shared selection, car deep links/navigation, all map profiles, pause, dialog Escape, friendly/Hacker UI switch, theme/reduced motion, pit driver changes, stable favourites, chequered/finished state, real-time outage/recovery, malformed and duplicate data, bundled replay/seek/export/import/errors, and live timing URL checks that make no request on format check and never persist query-string secrets.
 
 The map/theme regression suite additionally checks repeated selection during animation, all car centres remaining within 0.8 SVG units of the appropriate main/pit path through a pit cycle, visible pit-lane separation, non-overlapping Griffin’s Bend and Panorama text, fresh system-theme defaults, system appearance changes, and persisted manual overrides. Selection no longer restarts the smoothing interval; overlap handling offsets number labels rather than car bodies. The driving-direction arrow has been removed.
 

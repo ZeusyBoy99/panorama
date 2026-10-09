@@ -20,6 +20,7 @@ import {
 } from '../src/providers/live/adapter';
 import { IncidentDetector } from '../src/providers/live/incidents';
 import { snapshotSchema } from '../src/domain/schema';
+import { shouldBootLive } from '../src/state/runtime';
 import { SessionController } from '../src/state/controller';
 import { useRace } from '../src/state/store';
 
@@ -186,7 +187,14 @@ describe('natsoft snapshot adapter', () => {
 });
 
 describe('incident detector', () => {
-  const opts = { pitting: false, leaderLaps: 5, running: true };
+  it('boots live by default, demo only when asked or offline', () => {
+    expect(shouldBootLive('', true)).toBe(true);
+    expect(shouldBootLive('?live', true)).toBe(true);
+    expect(shouldBootLive('?car=entry-1', true)).toBe(true);
+    expect(shouldBootLive('?demo', true)).toBe(false);
+    expect(shouldBootLive('?demo&car=entry-1', true)).toBe(false);
+    expect(shouldBootLive('', false)).toBe(false);
+  });  const opts = { pitting: false, leaderLaps: 5, running: true };
   it('alerts on a 5+ place fall inside 90 seconds, once per episode', () => {
     const detector = new IncidentDetector();
     expect(detector.check('car', 8, 0, opts)).toBeNull();

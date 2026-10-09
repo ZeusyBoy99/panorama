@@ -59,3 +59,13 @@ export const useRuntime = create<Runtime>((set, get) => ({
     set({ provider: null, liveUrl: null });
   },
 }));
+
+/**
+ * Live is the default boot source: the app connects to the timing feed
+ * unless the visitor explicitly asked for the demo (`?demo`) or the browser
+ * is offline (live needs a connection; the demo works offline).
+ */
+export function shouldBootLive(search: string, online: boolean): boolean {
+  if (new URLSearchParams(search).get('demo') !== null) return false;
+  return online;
+}

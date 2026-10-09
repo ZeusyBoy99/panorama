@@ -7,6 +7,7 @@ import { useOnline, useTheme, useTicker, useVisibilityResync, useWakeLock } from
 import { APP_NAME } from '../domain/schema';
 import { DEFAULT_LIVE_URL } from '../providers/live/decode';
 import { readLiveUrl } from '../persistence/storage';
+import { shouldBootLive } from '../state/runtime';
 import { clockTime } from '../domain/format';
 import { Icon } from '../components/Icon';
 import { TimingTower } from '../features/timing/TimingTower';
@@ -264,10 +265,9 @@ export function App() {
   }, []);
   useEffect(() => {
     controller.hydrate();
-    // Shareable live link: opening the app with ?live connects straight to
-    // the timing feed (when online). Plain opens keep the offline demo boot.
-    const query = new URLSearchParams(window.location.search);
-    if (query.get('live') !== null && navigator.onLine) {
+    // Live is the default: connect to the timing feed unless the visitor
+    // asked for the demo (?demo) or is offline. `?live` links keep working.
+    if (shouldBootLive(window.location.search, navigator.onLine)) {
       try {
         startLive(readLiveUrl() || DEFAULT_LIVE_URL);
       } catch {

@@ -17,7 +17,7 @@ test('working demo, filters, favourite persistence, shared selection and deep li
 }) => {
   const errors: string[] = [];
   page.on('pageerror', (e) => errors.push(e.message));
-  await page.goto('/');
+  await page.goto('/?demo');
   await expect(page.locator('.timing-table tbody tr')).toHaveCount(24);
   await expect(page.locator('.source-badge').first()).toHaveText('DEMO — SIMULATED DATA');
   await page.getByLabel('Search cars, drivers or teams').fill('Blake Mercer');
@@ -31,7 +31,7 @@ test('working demo, filters, favourite persistence, shared selection and deep li
   await expect(
     page.getByRole('button', { name: 'Unfavourite car 07', exact: true }),
   ).toHaveAttribute('aria-pressed', 'true');
-  await page.goto('/map?car=entry-2');
+  await page.goto('/map?demo&car=entry-2');
   await expect(page.locator('.selected-panel .large-number')).toHaveText('12');
   await page.getByRole('link', { name: 'Standings', exact: true }).click();
   await expect(page.locator('.selected-panel .large-number')).toHaveText('12');
@@ -48,7 +48,7 @@ test('working demo, filters, favourite persistence, shared selection and deep li
   expect(errors).toEqual([]);
 });
 test('all capability profiles, pause, keyboard dialog and reduced motion', async ({ page }) => {
-  await page.goto('/map');
+  await page.goto('/map?demo');
   await lab(page);
   for (const [profile, label] of [
     ['sector', 'ESTIMATED · SECTOR'],
@@ -79,7 +79,7 @@ test('all capability profiles, pause, keyboard dialog and reduced motion', async
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
 });
 test('pit cycle and finish checkpoints produce events and stable entries', async ({ page }) => {
-  await page.goto('/');
+  await page.goto('/?demo');
   await page.getByRole('button', { name: 'Favourite car 07', exact: true }).click();
   await scenario(page, 'Pit cycle');
   await expect(
@@ -97,7 +97,7 @@ test('pit cycle and finish checkpoints produce events and stable entries', async
 test('15 real second outage, invalid schema, duplicate rejection and recovery', async ({
   page,
 }) => {
-  await page.goto('/');
+  await page.goto('/?demo');
   await lab(page);
   await page.getByRole('button', { name: '20×', exact: true }).click();
   await page.getByText('Advanced demo options', { exact: true }).click();
@@ -121,7 +121,7 @@ test('sample replay, seek, export/import, invalid files and live timing URL', as
   page.on('request', (r) => {
     if (r.url().includes('example.net')) arbitrary.push(r.url());
   });
-  await page.goto('/settings');
+  await page.goto('/settings?demo');
   await page.getByRole('button', { name: 'Load sample replay', exact: true }).click();
   await expect(page.locator('.source-badge').first()).toHaveText('REPLAY — SIMULATED DATA');
   await lab(page);
@@ -175,7 +175,7 @@ test('required viewports, direct reload, mobile tap detail and console health', 
     { width: 1440, height: 900 },
   ]) {
     await page.setViewportSize(size);
-    await page.goto('/');
+    await page.goto('/?demo');
     await expect(page.locator('.timing-table tbody tr')).toHaveCount(24);
     expect(
       await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth),

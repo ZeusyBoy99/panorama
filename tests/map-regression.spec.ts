@@ -24,7 +24,7 @@ test('new visitors follow system appearance, while an explicit preference persis
 
 test('repeated map selection leaves the cars moving smoothly', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'no-preference' });
-  await page.goto('/map');
+  await page.goto('/map?demo');
   await speed(page, '5×');
   await expect(page.locator('.car-marker:visible')).toHaveCount(24);
   const motion = await page.evaluate(async () => {
@@ -82,7 +82,7 @@ test('repeated map selection leaves the cars moving smoothly', async ({ page }) 
 });
 
 test('car position dots stay on the track or pit path through a pit cycle', async ({ page }) => {
-  await page.goto('/map');
+  await page.goto('/map?demo');
   await speed(page, '20×', 'Pit cycle');
   await expect(page.locator('.car-marker[data-path="pit"]:visible').first()).toBeVisible();
   const distances = await page.evaluate(async () => {
@@ -118,7 +118,7 @@ test('car position dots stay on the track or pit path through a pit cycle', asyn
 test('pit lane is visually separate and the map title does not cover Griffin’s Bend', async ({
   page,
 }) => {
-  await page.goto('/map');
+  await page.goto('/map?demo');
   const geometry = await page.evaluate(() => {
     const main = document.querySelector<SVGPathElement>('.track-core')!;
     const pit = document.querySelector<SVGPathElement>('.pit-path')!;

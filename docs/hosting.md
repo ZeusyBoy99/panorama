@@ -20,10 +20,7 @@ Requirements (all covered below):
 
 1. Run `npm run build`.
 2. Open <https://app.netlify.com/drop> and drag the `dist/` folder onto it.
-3. You get a public `https://<name>.netlify.app` link instantly. Share your
-   live view directly: `https://<name>.netlify.app/?live` connects to the
-   default Bathurst feed on load (when online); without `?live` the app
-   opens the offline demo.
+3. You get a public `https://<name>.netlify.app` link instantly. It opens live timing by default when online; `?demo` opens the simulated demo instead. Share the bare link.
 
 ## Recommended: Cloudflare Pages (free, fast, stays free)
 
@@ -55,7 +52,6 @@ location / { try_files $uri $uri/ /index.html; }
 
 ## After deploying
 
-- Open the public link, then open it with `?live` to check the feed
-  connects (`LIVE — NATSOFT FEED` badge, live session name in the header).
+- Open the public link and confirm it connects on load (`LIVE — NATSOFT FEED` badge, live session name in the header); open it with `?demo` to check the simulated fallback.
 - Install prompt, offline reload and the `Update now` flow only appear on
   the HTTPS production build, never on localhost.
