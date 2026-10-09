@@ -56,3 +56,20 @@ export function readSnapshot(): Snapshot | null {
     return null;
   }
 }
+const LIVE_URL_KEY = 'panorama.live-url.v1';
+export function readLiveUrl(): string {
+  try {
+    const value = localStorage.getItem(LIVE_URL_KEY);
+    return typeof value === 'string' ? value : '';
+  } catch {
+    return '';
+  }
+}
+export function saveLiveUrl(url: string) {
+  try {
+    if (url) localStorage.setItem(LIVE_URL_KEY, url);
+    else localStorage.removeItem(LIVE_URL_KEY);
+  } catch {
+    // Persistence is best-effort; connecting still works for the session.
+  }
+}

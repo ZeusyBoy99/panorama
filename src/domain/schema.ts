@@ -116,11 +116,15 @@ export const snapshotSchema = z
       eventId: id,
       id,
       name: text,
+      /** Meeting or championship context, e.g. "2026 Repco Bathurst 1000". Live only. */
+      meeting: text.nullable().optional(),
+      /** Series or category label, e.g. "TOYOTA GAZOO Racing Australia GR CUP". Live only. */
+      series: text.nullable().optional(),
       season: z.number().int(),
       trackId: id,
       type: z.enum(['race', 'practice', 'qualifying']),
       raceLaps: z.number().int().positive(),
-      trackKm: z.number().positive(),
+      trackKm: z.number().positive().nullable(),
       phase: z.enum(['pre-race', 'running', 'suspended', 'finished', 'unknown']),
       trackStatus: z.enum(['green', 'yellow', 'safety-car', 'red', 'chequered', 'unknown']),
       leaderLaps: z.number().int().nonnegative(),

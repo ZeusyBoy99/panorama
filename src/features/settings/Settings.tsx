@@ -3,6 +3,9 @@ import { useUI, useRace } from '../../state/store';
 import { useRuntime } from '../../state/runtime';
 import { controller } from '../../state/controller';
 import { parseRecording, MAX_REPLAY_BYTES } from '../../providers/replay/provider';
+import { NatsoftLiveProvider } from '../../providers/live/provider';
+import { DEFAULT_LIVE_URL, resolveTimingUrl } from '../../providers/live/decode';
+import { readLiveUrl, saveLiveUrl } from '../../persistence/storage';
 import { APP_NAME, APP_VERSION } from '../../domain/schema';
 import { useOnline } from '../../app/hooks';
 import { Icon } from '../../components/Icon';
@@ -22,13 +25,17 @@ export function Settings({
   const prefs = useUI((s) => s.preferences),
     set = useUI((s) => s.setPreferences),
     snapshot = useRace((s) => s.snapshot),
+    status = useRace((s) => s.status),
     loadFixture = useRuntime((s) => s.loadFixture),
     loadReplay = useRuntime((s) => s.loadReplay),
-    startDemo = useRuntime((s) => s.startDemo);
-  const [url, setUrl] = useState(''),
+    startDemo = useRuntime((s) => s.startDemo),
+    startLive = useRuntime((s) => s.startLive),
+    provider = useRuntime((s) => s.provider);
+  const [url, setUrl] = useState(() => readLiveUrl() || DEFAULT_LIVE_URL),
     [validation, setValidation] = useState(''),
     [error, setError] = useState(''),
     [success, setSuccess] = useState('');
+  const liveActive = provider instanceof NatsoftLiveProvider;
   const online = useOnline();
   async function importFile(file: File | undefined) {
     if (!file) return;
@@ -64,13 +71,35 @@ export function Settings({
   }
   function validateURL() {
     try {
-      const parsed = new URL(url);
-      if (!['https:', 'http:'].includes(parsed.protocol) || parsed.username || parsed.password)
-        throw new Error();
-      setValidation('Valid URL format. Live provider integration is not available yet.');
-    } catch {
-      setValidation('Enter a full http:// or https:// timing URL without credentials.');
+      resolveTimingUrl(url);
+      setValidation('Valid timing URL format. Press Connect for live timing to join.');
+    } catch (e) {
+      setValidation(e instanceof Error ? e.message : 'Enter a full timing URL.');
     }
+  }
+  function connectLive() {
+    setError('');
+    setSuccess('');
+    try {
+      const resolved = resolveTimingUrl(url);
+      // Persist the meeting address without query/hash: Natsoft meeting URLs
+      // carry no secrets, and anything after `?` (tokens, overrides) is
+      // never stored. The full URL is used for this session only.
+      const stripped = new URL(resolved.pageUrl);
+      stripped.search = '';
+      stripped.hash = '';
+      saveLiveUrl(stripped.toString());
+      startLive(resolved.pageUrl);
+      setSuccess('Connecting to live timing…');
+      setValidation('');
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Live timing could not start.');
+    }
+  }
+  function disconnectLive() {
+    saveLiveUrl('');
+    startDemo();
+    setSuccess('Disconnected. Demo simulator restarted.');
   }
   const ios = /iPhone|iPad|iPod/.test(navigator.userAgent);
   return (
@@ -245,27 +274,58 @@ export function Settings({
             )}
           </div>
           <div className="detail-section">
-            <h4>Future live timing</h4>
-            <label className="field">
-              Timing URL{' '}
-              <input
-                type="url"
-                value={url}
-                onChange={(e) => setUrl(e.target.value)}
-                placeholder="https://provider.example/timing"
-                autoComplete="off"
-              />
-            </label>
-            <button className="button" onClick={validateURL}>
-              Check URL format
-            </button>
-            <p className="muted" role="status">
-              {validation ||
-                'Live provider integration is not available yet. The actual timing link is needed before live timing can be added.'}
-            </p>
-            <small className="muted">
-              This preview checks format locally. The URL is neither requested nor saved.
-            </small>
+            <h4>Live timing (Natsoft)</h4>
+            {liveActive ? (
+              <>
+                <p className="muted">
+                  Connected source:{' '}
+                  <span className="mono">{(provider as NatsoftLiveProvider).pageUrl}</span>
+                </p>
+                <p className="muted" role="status">
+                  Feed: {status.connection} · {status.message}
+                </p>
+                <div className="source-actions">
+                  <button className="button" onClick={disconnectLive}>
+                    <Icon name="close" />
+                    Disconnect live timing
+                  </button>
+                </div>
+                <small className="muted">
+                  Positions are coarse track-segment reports from the timing feed — the map
+                  shows genuine observations, never invented GPS.
+                </small>
+              </>
+            ) : (
+              <>
+                <label className="field">
+                  Timing URL{' '}
+                  <input
+                    type="url"
+                    value={url}
+                    onChange={(e) => setUrl(e.target.value)}
+                    placeholder="http://server.natsoft.com.au:8080/LiveMeeting/20261011.MOUN"
+                    autoComplete="off"
+                  />
+                </label>
+                <div className="source-actions">
+                  <button className="button" onClick={validateURL}>
+                    Check URL format
+                  </button>
+                  <button className="button accent-button" onClick={connectLive}>
+                    <Icon name="radio" />
+                    Connect live timing
+                  </button>
+                </div>
+                <p className="muted" role="status">
+                  {validation ||
+                    'Paste a Natsoft LiveMeeting page URL. The app opens its timing feed directly — no login, no proxy.'}
+                </p>
+                <small className="muted">
+                  Only explicit timing URLs are ever opened. Redirects are revalidated and
+                  credential-bearing URLs are rejected.
+                </small>
+              </>
+            )}
           </div>
         </div>
       </section>

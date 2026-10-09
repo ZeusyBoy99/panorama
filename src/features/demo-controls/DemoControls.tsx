@@ -4,6 +4,7 @@ import { useRuntime } from '../../state/runtime';
 import { scenarios, type Scenario } from '../../providers/mock/engine';
 import { MockProvider, type Fault } from '../../providers/mock/provider';
 import { ReplayProvider } from '../../providers/replay/provider';
+import { NatsoftLiveProvider } from '../../providers/live/provider';
 import type { Profile } from '../../domain/schema';
 import { Icon } from '../../components/Icon';
 import { clockTime } from '../../domain/format';
@@ -65,15 +66,38 @@ export function DemoControls() {
       <p className="muted">
         Try a race situation, change playback speed, or explore different map detail.
       </p>
+      {provider instanceof NatsoftLiveProvider ? (
+        <>
+          <p className="notice">
+            Live timing is connected. Playback controls are unavailable for the real feed; it
+            runs at the circuit&apos;s pace.
+          </p>
+          <div className="source-actions">
+            <button className="button" onClick={() => startDemo()}>
+              Return to demo simulator
+            </button>
+          </div>
+        </>
+      ) : (
+      <>
       <div className="playback-bar">
         <button
           className="button accent-button"
-          onClick={() => provider?.setPaused(!status.paused)}
+          onClick={() => {
+            if (provider instanceof MockProvider || provider instanceof ReplayProvider)
+              provider.setPaused(!status.paused);
+          }}
         >
           <Icon name={status.paused ? 'play' : 'pause'} />
           {status.paused ? 'Resume' : 'Pause'}
         </button>
-        <button className="button" onClick={() => provider?.reset()}>
+        <button
+          className="button"
+          onClick={() => {
+            if (provider instanceof MockProvider || provider instanceof ReplayProvider)
+              provider.reset();
+          }}
+        >
           <Icon name="reset" />
           Reset
         </button>
@@ -82,7 +106,10 @@ export function DemoControls() {
             <button
               key={s}
               className={status.speed === s ? 'active' : ''}
-              onClick={() => provider?.setSpeed(s)}
+              onClick={() => {
+                if (provider instanceof MockProvider || provider instanceof ReplayProvider)
+                  provider.setSpeed(s);
+              }}
               aria-pressed={status.speed === s}
             >
               {s}×
@@ -196,6 +223,8 @@ export function DemoControls() {
         Changing a scenario restarts the demo at a preset race point. All entries, timing, events,
         and positions are fictional.
       </p>
+      </>
+      )}
     </dialog>
   );
 }

@@ -1,6 +1,6 @@
 # Panorama
 
-An independent, mobile-first race companion PWA for the Bathurst 1000. **Stage 1 runs entirely on fictional simulated data.** It has no connection to an official timing provider, no credentials, backend, database, paid service, or external map dependency.
+An independent, mobile-first race companion PWA for the Bathurst 1000. It opens on **fictional simulated data** (labelled DEMO), and can also connect **live timing** from a public Natsoft `LiveMeeting` URL — for example the 2026 event feed at `http://server.natsoft.com.au:8080/LiveMeeting/20261011.MOUN`. Live mode has no credentials, backend, database, paid service, or external map dependency: the app opens the feed's WebSocket directly from the browser.
 
 ## Run locally
 
@@ -37,6 +37,7 @@ npm run test:browser
 - **Track map:** pan by dragging, zoom with buttons or a two-finger pinch, reset to fit, select numbered markers. Keyboard users can tab to markers and press Enter/Space. Car bodies stay on the path; crowded number labels use small connector lines. Selecting a car does not restart its motion.
 - **Car details:** classification, drivers, lap/sector history, trend, stints, pit stops, penalties and related events. Selection survives navigation and reload through `?car=entry-…`.
 - **Race updates:** supplied and derived events are labelled separately, with a favourites filter. Derived classification changes are not claims about physical overtaking locations.
+- **Live timing:** paste a Natsoft `LiveMeeting` page URL in Settings → Live timing to follow the real meeting: timing tower, coarse track-segment map positions, session name/series/type (race/practice/qualifying), track status and remaining time. The field defaults to the 2026 Bathurst feed, and opening the app with `?live` connects straight to it when online. A banner warns of *possible* incidents when a car falls 5+ places in ~90 seconds (pit stops excluded) — positions only, never a crash claim. See [live integration](docs/live-integration.md).
 - **Settings:** a friendly default interface with optional Hacker UI, dark/light/system theme (Follow system by default), row density, reduced motion, favourites, feature-detected wake lock, replay import/export, installation guidance and an inert timing-URL format preview.
 - **Demo controls (Race lab in Hacker UI):** scenario, deterministic seed, four map capability modes, pause/resume/reset, 1×/5×/20×, and injected feed failures. It is separate from the normal fan-facing display.
 
@@ -58,7 +59,7 @@ Keep recordings under 8 MB and 180 records. Imported JSON is never evaluated or 
 
 ## Production hosting readiness
 
-Serve `dist` over HTTPS. Configure SPA rewrites for `/`, `/map`, `/events`, `/settings` and car query parameters: unknown non-asset routes should return `/index.html` with status 200. Keep `/api/*` out of the app-shell fallback. Example Netlify rule: `/* /index.html 200`; on Nginx use `try_files $uri $uri/ /index.html`. The Vite dev/preview servers already handle these reloads. No public deployment has been performed.
+Serve `dist` over HTTPS. Configure SPA rewrites for `/`, `/map`, `/events`, `/settings` and car query parameters: unknown non-asset routes should return `/index.html` with status 200. Keep `/api/*` out of the app-shell fallback. Example Netlify rule: `/* /index.html 200`; on Nginx use `try_files $uri $uri/ /index.html`. The Vite dev/preview servers already handle these reloads. `public/_redirects` (Netlify/Cloudflare) and `vercel.json` (Vercel) ship the fallback. No public deployment has been performed. See [hosting](docs/hosting.md) for free public options (Netlify Drop, Cloudflare Pages, Vercel).
 
 The service worker precaches only local essential assets. No timing transport is cached. Updates show an **Update now** action; no forced race-time reload. Browsers may suspend background execution; the simulator bounds catch-up work and a visible tab resynchronises before animation continues.
 
@@ -66,7 +67,7 @@ The service worker precaches only local essential assets. No timing transport is
 
 The 24 entries / 48 drivers are fictional. Lap pace, pit traversal, race-control scenarios and timing regions are synthetic. The 6.213 km / 161 lap configuration is event context, not evidence of real feed capabilities. Circuit centerline geometry is derived from OpenStreetMap, with its attribution and ODbL source bundled locally. Sector and service anchors are demo estimates, not surveyed timing loops. See [geometry attribution](docs/geometry-attribution.md). The scoring, safety-car and finish models are intentionally simplified and documented.
 
-Real timing integration awaits the actual supported provider link. The URL field validates syntax locally and makes no request. The real source may expose classification only, which is a valid mode with no invented car positions. See [live integration](docs/live-integration.md).
+Real timing integration is live for public Natsoft feeds: the URL field validates the address, `wss://` works under HTTPS with no proxy, and only explicit timing URLs are ever opened (redirects revalidated, credentials rejected). A feed may expose classification only — that remains a valid mode with no invented car positions. Map markers from live data are coarse segment reports, never GPS. See [live integration](docs/live-integration.md).
 
 Real iPhone/Android installation, wake-lock behaviour, long races on representative phones and browser-specific update UX still need device checks. Automated WebKit is not a Home Screen installation test. No background feed continuity, push notifications, official GPS, or full sporting regulations are claimed.
 

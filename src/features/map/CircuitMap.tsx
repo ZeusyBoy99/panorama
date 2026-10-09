@@ -378,6 +378,9 @@ export const CircuitMap = memo(function CircuitMap({ large = false }: { large?: 
         </span>
       </div>
       <p className="map-note">
+        {snapshot?.source === 'live'
+          ? 'Live positions are coarse timing-feed segments, not GPS — markers sit at segment midpoints and fade as reports age. '
+          : null}
         {trackGeometryNotice}. Close car labels are offset for readability.{' '}
         <a href={trackAttribution.url} target="_blank" rel="noreferrer">
           Map attribution

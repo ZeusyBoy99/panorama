@@ -5,12 +5,15 @@ import { useRuntime } from '../state/runtime';
 import { controller } from '../state/controller';
 import { useOnline, useTheme, useTicker, useVisibilityResync, useWakeLock } from './hooks';
 import { APP_NAME } from '../domain/schema';
+import { DEFAULT_LIVE_URL } from '../providers/live/decode';
+import { readLiveUrl } from '../persistence/storage';
 import { clockTime } from '../domain/format';
 import { Icon } from '../components/Icon';
 import { TimingTower } from '../features/timing/TimingTower';
 import { CircuitMap } from '../features/map/CircuitMap';
 import { CarDetails } from '../features/cars/CarDetails';
 import { EventFeed } from '../features/events/EventFeed';
+import { IncidentBanner } from '../features/events/IncidentBanner';
 import { DemoControls } from '../features/demo-controls/DemoControls';
 import { Settings } from '../features/settings/Settings';
 import { UpdatePrompt } from '../pwa/UpdatePrompt';
@@ -50,6 +53,10 @@ function Header() {
       : Math.max(0, now - snapshot.receiptTimestamp);
   const stale = !status.paused && age > 3000;
   const track = snapshot?.session.trackStatus ?? 'unknown';
+  const live = snapshot?.source === 'live';
+  const sessionType = snapshot?.session.type;
+  const raceLaps = snapshot?.session.raceLaps ?? 161;
+  const remaining = snapshot?.session.remaining ?? null;
   return (
     <>
       <header className="topbar">
@@ -89,17 +96,46 @@ function Header() {
       <div className="race-header">
         <div className="race-heading">
           <div className="event-kicker">
-            <span>{friendly ? '2026 race companion' : '2026'}</span>
+            <span>{live ? 'Live timing' : friendly ? '2026 race companion' : '2026'}</span>
             <span className="source-badge">
-              {snapshot?.source === 'replay' ? 'REPLAY — SIMULATED DATA' : 'DEMO — SIMULATED DATA'}
+              {snapshot?.source === 'live'
+                ? 'LIVE — NATSOFT FEED'
+                : snapshot?.source === 'replay'
+                  ? 'REPLAY — SIMULATED DATA'
+                  : 'DEMO — SIMULATED DATA'}
             </span>
+            {live && sessionType && (
+              <span className="source-badge">
+                {sessionType === 'race'
+                  ? 'RACE'
+                  : sessionType === 'qualifying'
+                    ? 'QUALIFYING'
+                    : 'PRACTICE'}
+              </span>
+            )}
             {cached && <span className="source-badge">LAST-KNOWN CACHE</span>}
           </div>
           <h1>
-            Bathurst <span>1000</span>
+            {live ? (
+              snapshot?.session.name ?? 'Live timing'
+            ) : (
+              <>
+                Bathurst <span>1000</span>
+              </>
+            )}
           </h1>
           <p>
-            Mount Panorama <span>·</span> Independent race companion
+            {live ? (
+              <>
+                {[snapshot?.session.series, snapshot?.session.meeting]
+                  .filter(Boolean)
+                  .join(' · ') || 'Live session'}
+              </>
+            ) : (
+              <>
+                Mount Panorama <span>·</span> Independent race companion
+              </>
+            )}
           </p>
         </div>
         <div className="race-metrics">
@@ -136,15 +172,18 @@ function Header() {
             <span>{friendly ? 'Leader’s lap' : 'LAP'}</span>
             <strong>
               {snapshot?.session.leaderLaps ?? '—'}
-              <small> / {snapshot?.session.raceLaps ?? 161}</small>
+              <small> / {raceLaps}</small>
             </strong>
             <div className="progress-track">
-              <i style={{ width: ((snapshot?.session.leaderLaps ?? 0) / 161) * 100 + '%' }} />
+              <i style={{ width: Math.min(100, ((snapshot?.session.leaderLaps ?? 0) / raceLaps) * 100) + '%' }} />
             </div>
           </div>
           <div className="race-clock">
             <span>{friendly ? 'Race time' : 'RACE TIME'}</span>
             <strong>{clockTime(snapshot?.session.elapsed ?? 0)}</strong>
+            {live && remaining !== null && (
+              <span className="remaining-time">{clockTime(remaining)} left</span>
+            )}
             <span
               className={
                 'connection ' +
@@ -201,11 +240,18 @@ function Header() {
     </>
   );
 }
+function LiveFooter() {
+  const snapshot = useRace((s) => s.snapshot);
+  if (snapshot?.source === 'live')
+    return <span>Live timing · Natsoft Race Results · Positions are coarse track segments</span>;
+  return <span>Fictional demo · OpenStreetMap circuit geometry · No official affiliation</span>;
+}
 export function App() {
   useTheme();
   useVisibilityResync();
   const wakeMessage = useWakeLock();
   const start = useRuntime((s) => s.startDemo);
+  const startLive = useRuntime((s) => s.startLive);
   const [params] = useSearchParams();
   const [install, setInstall] = useState<InstallEvent | null>(null);
   useEffect(() => {
@@ -218,9 +264,20 @@ export function App() {
   }, []);
   useEffect(() => {
     controller.hydrate();
-    start();
+    // Shareable live link: opening the app with ?live connects straight to
+    // the timing feed (when online). Plain opens keep the offline demo boot.
+    const query = new URLSearchParams(window.location.search);
+    if (query.get('live') !== null && navigator.onLine) {
+      try {
+        startLive(readLiveUrl() || DEFAULT_LIVE_URL);
+      } catch {
+        start();
+      }
+    } else {
+      start();
+    }
     return () => controller.stop();
-  }, [start]);
+  }, [start, startLive]);
   useEffect(() => {
     const from = params.get('car');
     if (from !== useUI.getState().selectedId) useUI.getState().select(from);
@@ -233,6 +290,7 @@ export function App() {
       </a>
       <Header />
       <main id="main">
+        <IncidentBanner />
         <Routes>
           <Route path="/" element={<Dashboard />} />
           <Route
@@ -281,7 +339,7 @@ export function App() {
       </main>
       <footer className="app-footer">
         <span>Panorama · Stay close to the race.</span>
-        <span>Fictional demo · OpenStreetMap circuit geometry · No official affiliation</span>
+        <LiveFooter />
       </footer>
       <DemoControls />
       <UpdatePrompt />

@@ -15,7 +15,7 @@ The executable contract is `src/domain/schema.ts`. All provider updates and ever
 | entries[].observedAt | Source-clock time of last per-car observation                                           |
 | events[].at          | Source-clock event time; stable ID and supplied/derived origin                          |
 
-Session carries event/session IDs, name, season, track/type, configured lap distance/km, phase, track status, leader laps, optional remaining time, IANA timezone and independent capability flags. Phase is pre-race/running/suspended/finished/unknown; track status is green/yellow/safety-car/red/chequered/unknown. Connection is separately connecting/connected/reconnecting/stopped/error, with playback pause/speed metadata.
+Session carries event/session IDs, name, optional meeting/series labels (live only), season, track/type, configured lap distance/km, phase, track status, leader laps, optional remaining time, IANA timezone and independent capability flags. Phase is pre-race/running/suspended/finished/unknown; track status is green/yellow/safety-car/red/chequered/unknown. `trackKm` is null when the feed's circuit length is unknown (Mount Panorama reports 6.213). Connection is separately connecting/connected/reconnecting/stopped/error, with playback pause/speed metadata.
 
 Entry identity is independent of current driver/rank. Each entry includes string car number (including leading zero), team identity/name/hex colour, two stable driver identities, nullable current driver, classified/grid place, completed laps, entry status, timing gaps, laps/sectors/crossings, pit count/observations, histories and an optional timestamped penalty. Durations use milliseconds; progress is dimensionless in [0,1]. The main circuit and pit lane have distinct progress coordinates.
 
@@ -46,6 +46,10 @@ A crossing is not a duration; durations alone do not establish timestamped locat
 | classification | Source classification/gaps, driver/pit status where available; no anchors/timing samples          | Visible circuit, no on-track car positions             |
 
 Sparse estimates stop at the expected boundary. Grace is max(3000 ms, 15% expected duration). They become unavailable after expected duration + twice grace. Yellow/safety-car/red/unknown status, unknown pit or stopping location disable timing-only estimates conservatively. Per-entry age is independent of global connectivity.
+
+## Live source (Natsoft)
+
+The live provider publishes `source: 'live'`, `profile: 'position'` with `positionSamples: true` and both crossing capabilities false: position observations carry `reported` provenance at coarse segment midpoints (7 track segments or Main), and no crossing anchors, lap-crossing fields or estimates are ever published. Gaps, laps, sector durations, last/best laps and pit counts are measured feed values; session type, series and meeting are parsed labels; timed support races without a scheduled distance fall back to the leader's laps for `raceLaps`. Possible-incident alerts are derived `position` events; lead changes, pit stops, fastest laps, status changes and finish are supplied or derived as labelled.
 
 ## Valid example
 

@@ -7,6 +7,7 @@ export function EventFeed({ compact = false }: { compact?: boolean }) {
   const favourites = useUI((s) => s.preferences.favourites);
   const select = useUI((s) => s.select);
   const [only, setOnly] = useState(false);
+  const live = snapshot?.source === 'live';
   const events = (snapshot?.events ?? [])
     .filter((e) => !only || e.entryIds.some((id) => favourites.includes(id)))
     .slice(compact ? -5 : -100)
@@ -36,7 +37,9 @@ export function EventFeed({ compact = false }: { compact?: boolean }) {
             <div className="event-symbol">
               <Icon
                 name={
-                  e.category === 'pit'
+                  e.message.startsWith('Possible incident')
+                    ? 'alert'
+                    : e.category === 'pit'
                     ? 'gauge'
                     : e.category === 'status' || e.category === 'finish'
                       ? 'flag'
@@ -62,9 +65,13 @@ export function EventFeed({ compact = false }: { compact?: boolean }) {
                 <p>{e.message}</p>
               )}
               <small>
-                {e.origin === 'derived'
-                  ? 'Derived · classification change'
-                  : 'Supplied · simulated feed'}
+                {e.message.startsWith('Possible incident')
+                  ? 'Derived · position drop — cause unknown, not a crash claim'
+                  : e.origin === 'derived'
+                    ? 'Derived · classification change'
+                    : live
+                      ? 'Supplied · live feed'
+                      : 'Supplied · simulated feed'}
               </small>
             </div>
           </article>

@@ -116,7 +116,7 @@ test('15 real second outage, invalid schema, duplicate rejection and recovery', 
   await expect(page.getByText(/Rejected messages:/)).toContainText('3');
   await closeLab(page);
 });
-test('sample replay, seek, export/import, invalid files and inert timing URL', async ({ page }) => {
+test('sample replay, seek, export/import, invalid files and live timing URL', async ({ page }) => {
   const arbitrary: string[] = [];
   page.on('request', (r) => {
     if (r.url().includes('example.net')) arbitrary.push(r.url());
@@ -154,10 +154,15 @@ test('sample replay, seek, export/import, invalid files and inert timing URL', a
     .fill('https://example.net/timing?secret=never-save');
   await page.getByRole('button', { name: 'Check URL format', exact: true }).click();
   await expect(
-    page.getByText('Valid URL format. Live provider integration is not available yet.'),
+    page.getByText('Valid timing URL format. Press Connect for live timing to join.'),
   ).toBeVisible();
   expect(arbitrary).toEqual([]);
   expect(await page.evaluate(() => JSON.stringify(localStorage))).not.toContain('never-save');
+  await page.getByRole('button', { name: 'Connect live timing', exact: true }).click();
+  await expect(page.getByText('Connecting to live timing…')).toBeVisible();
+  // Connecting persists the meeting address but never query-string secrets.
+  expect(await page.evaluate(() => JSON.stringify(localStorage))).not.toContain('never-save');
+  expect(await page.evaluate(() => JSON.stringify(localStorage))).toContain('example.net/timing');
 });
 test('required viewports, direct reload, mobile tap detail and console health', async ({
   page,

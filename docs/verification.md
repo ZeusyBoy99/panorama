@@ -1,6 +1,6 @@
 # Stage 1 verification
 
-Verified locally on **4 October 2026 (Australia/Perth)** with Node 24.11.0 / npm 11.6.1. There is no public deployment, real timing connection, server/database, or API key.
+Verified locally on **4 October 2026 (Australia/Perth)** with Node 24.11.0 / npm 11.6.1. There is no public deployment, server/database, or API key. Live timing (Natsoft, no login) was connected and verified on **9 October 2026** against the public 2026 Repco Bathurst 1000 meeting feed; see the live section below.
 
 ## Commands actually run
 
@@ -28,7 +28,7 @@ Deterministic seeded clock across cadence/acceleration; valid summed sector timi
 
 ## Browser coverage
 
-Both Chromium 153 and WebKit 26.6 covered the default working 24-car demo, demo labels, driver search, favourite/reload persistence, row/map shared selection, car deep links/navigation, all map profiles, pause, dialog Escape, friendly/Hacker UI switch, theme/reduced motion, pit driver changes, stable favourites, chequered/finished state, real-time outage/recovery, malformed and duplicate data, bundled replay/seek/export/import/errors, and URL preview making no requests or storing query secrets.
+Both Chromium 153 and WebKit 26.6 covered the default working 24-car demo, demo labels, driver search, favourite/reload persistence, row/map shared selection, car deep links/navigation, all map profiles, pause, dialog Escape, friendly/Hacker UI switch, theme/reduced motion, pit driver changes, stable favourites, chequered/finished state, real-time outage/recovery, malformed and duplicate data, bundled replay/seek/export/import/errors, and live timing URL checks that make no request on format check and never persist query-string secrets.
 
 The map/theme regression suite additionally checks repeated selection during animation, all car centres remaining within 0.8 SVG units of the appropriate main/pit path through a pit cycle, visible pit-lane separation, non-overlapping Griffin’s Bend and Panorama text, fresh system-theme defaults, system appearance changes, and persisted manual overrides. Selection no longer restarts the smoothing interval; overlap handling offsets number labels rather than car bodies. The driving-direction arrow has been removed.
 
@@ -44,6 +44,19 @@ No page errors were recorded in the basic interaction and viewport flows. Essent
 - [WebKit 390×844](screenshots/webkit-390.png)
 - [WebKit 768×1024](screenshots/webkit-768.png)
 - [WebKit 1440×900](screenshots/webkit-1440.png)
+
+## Live timing verification (9 October 2026)
+
+Inspected the supplied `http://server.natsoft.com.au:8080/LiveMeeting/20261011.MOUN` page, decoded its WebSocket protocol from the served `Client_Obfs.js`/`Live_Obfs.js`, and captured ~700 real packets (GR Cup Race 1: Yellow running, Green flag, lap completions, `Ended` finish). Captured fixtures are checked in under `tests/fixtures/natsoft/`.
+
+| Command / check | Result |
+| --------------- | ------ |
+| `npx vitest run tests/live-natsoft.test.ts` | 11 checks passed: XOR round-trip, URL resolution/rejection, New import, partial merge, clock/status, snapshot validity, controller acceptance, incident rules |
+| `npm test` | 38 checks passed (27 existing + 11 live) |
+| `npm run typecheck` / `npm run lint` / `npm run build` | Passed |
+| Live smoke (`NatsoftLiveProvider` against the real feed, 20 s) | Connected, 4 snapshots, all schema-valid; session/entries/events sane (29 cars, leader lap 4, finished phase). One defect found and fixed: non-numeric countdown produced `remaining: NaN`; countdown values are now validated with trailing-dash negative support |
+
+Remaining live checks: browser UI pass against a running session (next live window), real-device install/offline behaviour, and a multi-session observation (practice/qualifying type mapping and pit-flag values are inferred from client code, not yet seen live).
 
 ## Remaining checks and deliberate limits
 

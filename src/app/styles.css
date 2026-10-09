@@ -1496,6 +1496,22 @@ main {
   background: var(--surface);
   margin-bottom: 20px;
 }
+.incident-notice {
+  color: #ffd9de;
+  background: #4d1420;
+  border-top-color: #8a2438;
+  border-bottom-color: #8a2438;
+  flex-wrap: wrap;
+}
+.incident-actions {
+  display: inline-flex;
+  gap: 8px;
+  margin-left: auto;
+}
+.remaining-time {
+  font-size: 11px;
+  color: var(--muted);
+}
 .app-footer {
   display: flex;
   justify-content: space-between;
