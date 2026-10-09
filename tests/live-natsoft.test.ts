@@ -9,6 +9,7 @@ import {
 } from '../src/providers/live/state';
 import {
   NatsoftAdapter,
+  feedSectorLabels,
   formatLap,
   mapSessionType,
   mapTrackStatus,
@@ -16,6 +17,7 @@ import {
   parseGap,
   parseSeries,
   parseTimeSeconds,
+  prettySegmentName,
   segmentProgress,
 } from '../src/providers/live/adapter';
 import { IncidentDetector } from '../src/providers/live/incidents';
@@ -100,6 +102,7 @@ describe('natsoft packet parsing and merge', () => {
   it('tracks clock, track status and rejects unavailable meetings', () => {
     const state = emptyState();
     applyPacket(state, fixture('new.xml'));
+    expect(state.intermediateIds).toEqual([3, 5]);
     applyPacket(state, lines('countdown.xml')[0]);
     expect(state.clock?.elapsed).toBe('887');
     expect(state.clock?.value).toBe('133');
@@ -160,6 +163,13 @@ describe('natsoft snapshot adapter', () => {
     }
     // No crossing anchors are ever published for live data.
     expect(s.entries.every((e) => e.lastCrossing === null)).toBe(true);
+    // Feed intermediates replace the demo sector anchors.
+    expect(s.session.sectorLabels).toEqual([
+      { name: 'INT 1', progress: 2.5 / 7 },
+      { name: 'INT 2', progress: 4.5 / 7 },
+    ]);
+    expect(prettySegmentName('Int1')).toBe('INT 1');
+    expect(feedSectorLabels(liveState())).toHaveLength(2);
     // A fresh build emits no incident alerts.
     expect(s.events.some((e) => e.message.startsWith('Possible incident'))).toBe(false);
   });

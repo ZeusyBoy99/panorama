@@ -87,7 +87,8 @@ export interface LiveFeedState {
   trackCode: string;
   trackName: string;
   segments: string[];
-  pitSegmentIds: [number, number];
+  /** Track-position IDs (1-based into segments) of the intermediate timing points (PI1/PI2). */
+  intermediateIds: [number, number];
   eventCode: string;
   eventName: string;
   eventKind: string;
@@ -113,7 +114,7 @@ export function emptyState(): LiveFeedState {
     trackCode: '',
     trackName: '',
     segments: [],
-    pitSegmentIds: [0, 0],
+    intermediateIds: [0, 0],
     eventCode: '',
     eventName: '',
     eventKind: '',
@@ -279,7 +280,7 @@ function routeElement(
     case 'T':
       state.trackCode = child.attrs['C'] ?? state.trackCode;
       state.trackName = child.attrs['N'] ?? state.trackName;
-      state.pitSegmentIds = [num(child.attrs['PI1']), num(child.attrs['PI2'])];
+      state.intermediateIds = [num(child.attrs['PI1']), num(child.attrs['PI2'])];
       state.segments = childElements(child.inner)
         .filter((t) => t.name === 'TP')
         .sort((a, b) => num(a.attrs['ID']) - num(b.attrs['ID']))

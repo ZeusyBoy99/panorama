@@ -273,19 +273,36 @@ export const CircuitMap = memo(function CircuitMap({ large = false }: { large?: 
                 {l.name}
               </text>
             ))}
-            {sectorAnchors.slice(0, 2).map((a) => (
-              <g key={a.id}>
-                <circle cx={a.point[0]} cy={a.point[1]} r="6" className="sector-anchor" />
-                <text
-                  x={a.labelPoint[0]}
-                  y={a.labelPoint[1]}
-                  textAnchor="middle"
-                  className="sector-label"
-                >
-                  {a.label}
-                </text>
-              </g>
-            ))}
+            {snapshot?.source === 'live' && snapshot.session.sectorLabels
+              ? snapshot.session.sectorLabels.map((l) => {
+                  const pt = pointAt(l.progress, false);
+                  return (
+                    <g key={l.name}>
+                      <circle cx={pt.x} cy={pt.y} r="6" className="sector-anchor" />
+                      <text
+                        x={pt.x}
+                        y={pt.y - 12}
+                        textAnchor="middle"
+                        className="sector-label"
+                      >
+                        {l.name}
+                      </text>
+                    </g>
+                  );
+                })
+              : sectorAnchors.slice(0, 2).map((a) => (
+                  <g key={a.id}>
+                    <circle cx={a.point[0]} cy={a.point[1]} r="6" className="sector-anchor" />
+                    <text
+                      x={a.labelPoint[0]}
+                      y={a.labelPoint[1]}
+                      textAnchor="middle"
+                      className="sector-label"
+                    >
+                      {a.label}
+                    </text>
+                  </g>
+                ))}
             <path
               d={'M' + startFinish.line[0].join(',') + ' L' + startFinish.line[1].join(',')}
               className="finish-line"
@@ -390,7 +407,7 @@ export const CircuitMap = memo(function CircuitMap({ large = false }: { large?: 
       </div>
       <p className="map-note">
         {snapshot?.source === 'live'
-          ? 'Live positions are coarse timing-feed segments, not GPS — markers glide between reports at the field’s measured pace and fade as reports age. '
+          ? 'Live positions are coarse timing-feed segments, not GPS — markers glide between reports at the field’s measured pace and fade as reports age. INT markers are the feed’s intermediate points at estimated positions. '
           : null}
         {trackGeometryNotice}. Close car labels are offset for readability.{' '}
         <a href={trackAttribution.url} target="_blank" rel="noreferrer">

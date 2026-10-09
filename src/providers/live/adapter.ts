@@ -110,6 +110,24 @@ export function parseSeries(eventName: string, categoryCode: string): string | n
   return categoryCode || null;
 }
 
+/** Feed segment name to map label: "Int1" -> "INT 1". */
+export function prettySegmentName(name: string): string {
+  return name
+    .replace(/([A-Za-z])(\d)/g, '$1 $2')
+    .replace(/_/g, ' ')
+    .trim()
+    .toUpperCase();
+}
+
+/** Timing-loop labels at the same estimated positions the markers use. */
+export function feedSectorLabels(state: LiveFeedState): { name: string; progress: number }[] {
+  const count = Math.max(1, state.segments.length);
+  return state.segments
+    .map((name, i) => ({ name, id: i + 1, progress: (i + 0.5) / count }))
+    .filter((s) => state.intermediateIds.includes(s.id))
+    .map((s) => ({ name: prettySegmentName(s.name), progress: s.progress }));
+}
+
 /** Coarse segment label -> normalised progress. "Main" sits near start/finish. */
 export function segmentProgress(lp: string | undefined, segmentCount: number): number | null {
   if (!lp) return null;
@@ -331,6 +349,7 @@ export class NatsoftAdapter {
         type,
         raceLaps,
         timed,
+        sectorLabels: feedSectorLabels(state),
         trackKm: trackCode === 'moun' ? 6.213 : null,
         phase,
         trackStatus,

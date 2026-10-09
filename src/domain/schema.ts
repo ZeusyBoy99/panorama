@@ -126,6 +126,15 @@ export const snapshotSchema = z
       raceLaps: z.number().int().positive(),
       /** True when the session runs to time (or laps are unbounded, e.g. practice): raceLaps is then only a fallback, not a scheduled distance. Live only. */
       timed: z.boolean().optional(),
+      /**
+       * Provider-supplied timing-loop labels (e.g. the feed's intermediates).
+       * Positions are provider estimates at segment midpoints, not surveyed
+       * loop locations. Live only.
+       */
+      sectorLabels: z
+        .array(z.object({ name: text, progress: z.number().min(0).max(1) }))
+        .max(12)
+        .optional(),
       trackKm: z.number().positive().nullable(),
       phase: z.enum(['pre-race', 'running', 'suspended', 'finished', 'unknown']),
       trackStatus: z.enum(['green', 'yellow', 'safety-car', 'red', 'chequered', 'unknown']),
