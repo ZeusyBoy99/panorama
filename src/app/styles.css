@@ -1986,18 +1986,12 @@ main {
     width: 13px;
   }
   .timing-table .last-col,
-  .timing-table .wide-col,
-  .timing-table .current-col {
+  .timing-table .wide-col {
     display: none;
   }
-  /* Phones keep best lap always, plus gap for races or the ticking current
-     lap time for practice/qualifying (see session-nonrace on the table). */
-  .timing-table.session-nonrace .current-col {
-    display: table-cell;
-  }
-  .timing-table.session-nonrace .gap-col {
-    display: none;
-  }
+  /* Phones show gap, split and best side by side; last lap and lap counts
+     stay on larger screens. Starring happens from the tapped row's details
+     panel, so the whole star column steps aside. */
   .timing-table {
     table-layout: fixed;
     width: 100%;

@@ -15,8 +15,7 @@ export function TimingTower() {
   const setPref = useUI((s) => s.setPreferences);
   const cars = standings(snapshot, search, preferences.favourites, only),
     best = bestRaceLap(snapshot);
-  // Phones always show best lap plus gap (race) or the ticking current
-  // lap time (practice/qualifying).
+  // Phones show best lap plus gap and split side by side.
   const nonRace = snapshot?.session.type === 'practice' || snapshot?.session.type === 'qualifying';
   const previous = useRef(new Map<string, number | null>());
   const [changes, setChanges] = useState<Record<string, number>>({});
