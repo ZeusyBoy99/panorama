@@ -638,6 +638,11 @@ main {
   border-radius: 6px;
   box-shadow: inset 2px 0 0 var(--purple);
 }
+/* …and the rest of the row follows at a whisper so the purple lap reads
+   as one connected moment. Green never tints the row. */
+tr.pace-best > td {
+  background: color-mix(in srgb, var(--purple) 7%, transparent);
+}
 .mfr-badge {
   display: inline-block;
   font-size: 8px;

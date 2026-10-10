@@ -131,7 +131,8 @@ export function TimingTower() {
               className={
                 (e.id === selected ? 'selected ' : '') +
                 (e.status === 'retired' ? 'retired ' : '') +
-                (changes[e.id] ? 'changed' : '')
+                (changes[e.id] ? 'changed ' : '') +
+                (pace === 'race-best' ? 'pace-best' : '')
               }
               style={{ '--team': e.team.colour } as React.CSSProperties}
             >
