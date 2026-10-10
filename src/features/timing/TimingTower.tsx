@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useRace, useUI } from '../../state/store';
-import { bestRaceLap, currentLapTime, driverName, gapText, lapTime, paceClass, pitDwellMs, standings } from '../../domain/format';
+import { bestRaceLap, currentLapTime, driverName, gapText, lapTime, paceClass, pitDwellMs, shortTime, standings } from '../../domain/format';
 import { ManufacturerBadge, manufacturerOf } from '../../components/ManufacturerBadge';
 import { Icon } from '../../components/Icon';
 export function TimingTower() {
@@ -118,7 +118,10 @@ export function TimingTower() {
         <tbody>
           {cars.map((e) => {
             const dwell = pitDwellMs(e, snapshot?.session.elapsed ?? 0);
-            const dwellText = dwell !== null ? 'PIT +' + lapTime(dwell) : null;
+            const narrow =
+              typeof matchMedia !== 'undefined' && matchMedia('(max-width:720px)').matches;
+            const dwellText =
+              dwell !== null ? 'PIT +' + (narrow ? shortTime(dwell) : lapTime(dwell)) : null;
             // Personal-best pace colours only the split; session-best pace
             // additionally tints the whole name plate. Never while pitting.
             const pace = dwell !== null ? '' : paceClass(e.currentSectors, snapshot?.session.bestSectors, e.personalBestSectors);

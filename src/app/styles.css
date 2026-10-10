@@ -2007,6 +2007,13 @@ main {
     height: 30px;
     padding: 0 3px;
   }
+  /* Time columns shrink to their content so the best column keeps no dead
+     space and driver names get every spare pixel. */
+  .timing-table .gap-col,
+  .timing-table .current-col,
+  .timing-table .best-col {
+    width: 64px;
+  }
   .timing-table td {
     padding: 4px 3px;
     font-size: 12px;
@@ -2016,6 +2023,7 @@ main {
   .timing-table th:first-child {
     padding-left: 10px;
     width: 34px;
+    position: relative;
   }
   .timing-table td:last-child,
   .timing-table th:last-child {

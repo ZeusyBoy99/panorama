@@ -3,13 +3,13 @@ import { useState } from 'react';
 /**
  * Manufacturer badge.
  *
- * Shows the car maker's real emblem (Toyota wordmark, Ford blue oval,
- * Chevrolet bowtie) bundled locally under public/manufacturers/, sourced
- * from Wikimedia Commons file descriptions (Toyota logo.svg, Ford Motor
- * Company Logo.svg, Chevrolet bowtie 2023.svg). Marks belong to their makers
- * and are used purely to identify which brand each entry races for. Makers
- * without a bundled emblem fall back to a text pill; independent/fictional
- * team names render nothing so demo entries look exactly as before.
+ * Shows the car maker's real emblem (Toyota, Ford blue oval, Chevrolet
+ * bowtie) bundled locally under public/manufacturers/ — Toyota via SVG Repo,
+ * Ford/Chevrolet via Wikimedia Commons file descriptions. Marks belong to
+ * their makers and are used purely to identify which brand each entry races
+ * for. Makers without a bundled emblem fall back to a text pill;
+ * independent/fictional team names render nothing so demo entries look
+ * exactly as before.
  */
 export interface Manufacturer {
   brand: string;

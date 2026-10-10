@@ -77,6 +77,12 @@ export function clockTime(ms: number) {
     String(s % 60).padStart(2, '0')
   );
 }
+/** Compact m:ss duration for tight mobile cells (pit dwell without millis). */
+export function shortTime(ms: number | null) {
+  if (ms === null || !Number.isFinite(ms) || ms < 0) return '—';
+  const s = Math.floor(ms / 1000);
+  return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0');
+}
 export function driverName(e: Entry) {
   return e.drivers.find((d) => d.id === e.currentDriverId)?.name ?? 'Driver unknown';
 }
