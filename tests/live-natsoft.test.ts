@@ -276,11 +276,12 @@ describe('incident detector', () => {
   });
   it('grades record pace purple before personal pace green', () => {    const session = [126000, 40000, 78000];
     const personal = [127000, 41000, 79000];
-    // Latest completed sector decides, like a broadcast screen.
+    // Latest completed sector decides, like a broadcast screen; holding the
+    // benchmark keeps the badge.
     expect(paceClass([125000, null, null], session, personal)).toBe('race-best');
     expect(paceClass([125000, 40500, null], session, personal)).toBe('personal-best');
     expect(paceClass([125000, 41500, null], session, personal)).toBe('');
-    expect(paceClass([126000, null, null], session, personal)).toBe('personal-best');
+    expect(paceClass([126000, null, null], session, personal)).toBe('race-best');
     expect(paceClass([null, null, null], session, personal)).toBe('');
     expect(paceClass([125000, null, null], [null, null, null], personal)).toBe('personal-best');
     expect(paceClass([125000, null, null], undefined, undefined)).toBe('');
