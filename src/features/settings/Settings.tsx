@@ -282,7 +282,7 @@ export function Settings({
             {liveActive ? (
               <>
                 <p className="muted">
-                  Connected source:{' '}
+                  Timing source:{' '}
                   <span className="mono">{(provider as NatsoftLiveProvider).pageUrl}</span>
                 </p>
                 <p className="muted" role="status">
@@ -307,7 +307,7 @@ export function Settings({
                     type="url"
                     value={url}
                     onChange={(e) => setUrl(e.target.value)}
-                    placeholder="http://server.natsoft.com.au:8080/LiveMeeting/20261011.MOUN"
+                    placeholder={DEFAULT_LIVE_URL}
                     autoComplete="off"
                   />
                 </label>

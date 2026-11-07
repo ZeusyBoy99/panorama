@@ -1,6 +1,6 @@
 # Panorama
 
-An independent, mobile-first race companion PWA for the Bathurst 1000. It opens on **fictional simulated data** (labelled DEMO), and can also connect **live timing** from a public Natsoft `LiveMeeting` URL — for example the 2026 event feed at `http://server.natsoft.com.au:8080/LiveMeeting/20261011.MOUN`. Live mode has no credentials, backend, database, paid service, or external map dependency: the app opens the feed's WebSocket directly from the browser.
+Panorama is a mobile-first race companion for public Natsoft timing feeds, with a fictional Bathurst demo. It opens the configured meeting when online, defaulting to [Natsoft meeting 20261108.SAN](http://server.natsoft.com.au:8080/LiveMeeting/20261108.SAN). The browser connects directly to Natsoft; no login or backend is needed.
 
 ## Run locally
 
@@ -11,7 +11,7 @@ npm install
 npm run dev
 ```
 
-Open the Local URL printed by Vite (normally http://127.0.0.1:5173). The demo opens at a coherently generated checkpoint near lap 42. Name/version constants live in `src/domain/schema.ts`; update the manifest and document title when renaming.
+Open the Local URL printed by Vite (normally http://127.0.0.1:5173). Add `?demo` to open the simulator near lap 42. Name/version constants live in `src/domain/schema.ts`; update the manifest and document title when renaming.
 
 ```sh
 npm run typecheck
@@ -37,11 +37,11 @@ npm run test:browser
 - **Track map:** pan by dragging, zoom with buttons or a two-finger pinch, reset to fit, select numbered markers. Keyboard users can tab to markers and press Enter/Space. Car bodies stay on the path; crowded number labels use small connector lines. Selecting a car does not restart its motion.
 - **Car details:** classification, drivers, lap/sector history, trend, stints, pit stops, penalties and related events. Selection survives navigation and reload through `?car=entry-…`.
 - **Race updates:** supplied and derived events are labelled separately, with a favourites filter. Derived classification changes are not claims about physical overtaking locations.
-- **Live timing:** the app opens on the real meeting when online — timing tower, coarse track-segment map positions, session name/series/type (race/practice/qualifying), track status and remaining time. The feed URL defaults to the 2026 Bathurst meeting and can be changed in Settings → Live timing; `?demo` opens the simulated demo instead. A banner warns of *possible* incidents when a car falls 5+ places in ~90 seconds (pit stops excluded) — positions only, never a crash claim. See [live integration](docs/live-integration.md).
-- **Settings:** a friendly default interface with optional Hacker UI, dark/light/system theme (Follow system by default), row density, reduced motion, favourites, feature-detected wake lock, replay import/export, installation guidance and an inert timing-URL format preview.
+- **Live timing:** follow the session, standings, and current drivers as Natsoft reports them. The app checks again every 30 seconds if the meeting is unavailable. Change the meeting in Settings → Live timing, or open `?demo` for the simulator. The circuit map currently covers Mount Panorama; standings remain available for other circuits. See [live integration](docs/live-integration.md).
+- **Settings:** a friendly default interface with optional Hacker UI, dark/light/system theme (Follow system by default), row density, reduced motion, favourites, wake lock where supported, replay import/export, installation guidance and live timing source selection.
 - **Demo controls (Race lab in Hacker UI):** scenario, deterministic seed, four map capability modes, pause/resume/reset, 1×/5×/20×, and injected feed failures. It is separate from the normal fan-facing display.
 
-All transport snapshots pass the same runtime schema and session controller. Favourites and preferences are stored locally. A bounded last-known snapshot retains its original receipt timestamp; restarting opens a fresh, visibly labelled demo rather than implying cached information is live.
+All transport snapshots pass the same runtime schema and session controller. Favourites and preferences are stored locally. A bounded last-known snapshot retains its original receipt timestamp; the app waits for a fresh classification when a live meeting is selected.
 
 ## Replay
 
@@ -67,7 +67,7 @@ The service worker precaches only local essential assets. No timing transport is
 
 The 24 entries / 48 drivers are fictional. Lap pace, pit traversal, race-control scenarios and timing regions are synthetic. The 6.213 km / 161 lap configuration is event context, not evidence of real feed capabilities. Circuit centerline geometry is derived from OpenStreetMap, with its attribution and ODbL source bundled locally. Sector and service anchors are demo estimates, not surveyed timing loops. See [geometry attribution](docs/geometry-attribution.md). The scoring, safety-car and finish models are intentionally simplified and documented.
 
-Real timing integration is live for public Natsoft feeds: the URL field validates the address, `wss://` works under HTTPS with no proxy, and only explicit timing URLs are ever opened (redirects revalidated, credentials rejected). A feed may expose classification only — that remains a valid mode with no invented car positions. Map markers from live data are coarse segment reports, never GPS. See [live integration](docs/live-integration.md).
+Public Natsoft meetings open over a secure WebSocket. Panorama obtains the temporary connection token from the meeting page and keeps it in memory. Map markers on the supported circuit use coarse segment reports, not GPS. See [live integration](docs/live-integration.md).
 
 Real iPhone/Android installation, wake-lock behaviour, long races on representative phones and browser-specific update UX still need device checks. Automated WebKit is not a Home Screen installation test. No background feed continuity, push notifications, official GPS, or full sporting regulations are claimed.
 

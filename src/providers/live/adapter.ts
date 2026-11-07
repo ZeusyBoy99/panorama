@@ -158,6 +158,7 @@ interface CarMemory {
   lastStatus: Entry['status'];
   /** Current pit observation while pitting; exit record after leaving. */
   pitObs: Entry['pitObservation'];
+  stints: Entry['stints'];
 }
 
 export class NatsoftAdapter {
@@ -237,7 +238,7 @@ export class NatsoftAdapter {
       const id = this.entryId(def.number);
       if (seen.has(id)) continue;
       seen.add(id);
-      entries.push(this.buildEntry(state, row, def, id, rank + 1, leaderLaps, elapsedMs, trackCode));
+      entries.push(this.buildEntry(state, row, def, id, rank + 1, leaderLaps, elapsedMs));
     }
     if (!entries.length) return null;
 
@@ -371,6 +372,7 @@ export class NatsoftAdapter {
         series: parseSeries(state.eventName, state.categories[0]?.code ?? ''),
         season,
         trackId: trackCode === 'moun' ? 'mount-panorama' : 'natsoft-' + trackCode,
+        trackName: state.trackName.trim().slice(0, 300) || undefined,
         type,
         raceLaps,
         timed,
@@ -398,14 +400,18 @@ export class NatsoftAdapter {
     position: number,
     leaderLaps: number,
     elapsedMs: number,
-    trackCode: string,
   ): Entry {
-    void trackCode;
     const d = row.data;
     const laps = Math.max(0, num(d['L']));
-    const fullName = driverName(def, row.driverSlot);
-    const base = id + '-d0';
-    const mem = this.mem.get(id) ?? {
+    const roster = new Map<number, Entry['drivers'][number]>();
+    for (const { slot, name } of def.drivers) {
+      const label = name.trim();
+      if (label && (roster.has(slot) || roster.size < 24))
+        roster.set(slot, { id: id + '-d' + slot, name: label.slice(0, 300) });
+    }
+    const drivers = [...roster.values()];
+    const currentDriver = row.driverSlot === null ? undefined : roster.get(row.driverSlot);
+    const mem: CarMemory = this.mem.get(id) ?? {
       laps,
       sectors: [null, null, null] as [number | null, number | null, number | null],
       prevSectors: [null, null, null] as [number | null, number | null, number | null],
@@ -415,6 +421,7 @@ export class NatsoftAdapter {
       fresh: true,
       lastStatus: 'running' as Entry['status'],
       pitObs: null,
+      stints: [],
     };
     const sectors: [number | null, number | null, number | null] = [
       parseTimeSeconds(d['S1']),
@@ -473,6 +480,20 @@ export class NatsoftAdapter {
 
     const ageMs = Math.max(0, Math.round((state.lastT - row.updatedT) * 1000));
     const observedAt = Math.max(0, elapsedMs - ageMs);
+    const previousStint = mem.stints.at(-1);
+    if (currentDriver && currentDriver.id !== previousStint?.driverId) {
+      mem.stints = [...mem.stints, { driverId: currentDriver.id, fromLap: laps, at: observedAt }].slice(-12);
+      if (previousStint) {
+        this.addEvent({
+          id: 'live-driver-' + id + '-' + Math.round(row.updatedT * 1000) + '-' + row.driverSlot,
+          at: observedAt,
+          entryIds: [id],
+          category: 'driver',
+          message: ('Car ' + def.number + ' · ' + currentDriver.name + ' now driving').slice(0, 300),
+          origin: 'derived',
+        });
+      }
+    }
     const progress =
       status === 'pit' || status === 'unknown'
         ? null
@@ -502,11 +523,8 @@ export class NatsoftAdapter {
         name: def.vehicle || 'Independent',
         colour: TEAM_COLOURS[def.index % TEAM_COLOURS.length],
       },
-      drivers: [
-        { id: base, name: fullName },
-        { id: base + '-solo', name: '—' },
-      ],
-      currentDriverId: base,
+      drivers,
+      currentDriverId: currentDriver?.id ?? null,
       position,
       grid: null,
       laps,
@@ -529,7 +547,7 @@ export class NatsoftAdapter {
       pits: pitCount,
       observedAt,
       lapHistory: mem.history.map((h) => ({ ...h })),
-      stints: [{ driverId: base, fromLap: 0, at: 0 }],
+      stints: [...mem.stints],
       pitObservation: mem.pitObs,
       penalty: null,
     };
@@ -563,10 +581,4 @@ export class NatsoftAdapter {
 function num(value: string | undefined, fallback = 0): number {
   const n = Number(value);
   return Number.isFinite(n) ? n : fallback;
-}
-
-export function driverName(def: EntryDef, slot: number): string {
-  const match = def.drivers.find((v) => v.slot === slot) ?? def.drivers[0];
-  const name = (match?.name ?? '').trim();
-  return name || 'Car ' + def.number;
 }

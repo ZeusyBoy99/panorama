@@ -593,7 +593,7 @@ main {
   align-items: center;
   justify-content: center;
   background: color-mix(in srgb, var(--team) 12%, var(--panel));
-  border-left: 2px solid var(--team);
+  border: 1px solid color-mix(in srgb, var(--team) 65%, var(--border));
   color: var(--team);
   width: 34px;
   height: 29px;
@@ -1019,7 +1019,7 @@ tr.pace-best > td {
   padding: 20px;
 }
 .large-number {
-  border-left: 3px solid var(--team);
+  border: 1px solid color-mix(in srgb, var(--team) 65%, var(--border));
   background: color-mix(in srgb, var(--team) 10%, var(--panel));
   color: var(--team);
   font-size: 32px;
@@ -2498,7 +2498,6 @@ tr.pace-best > td {
   width: 37px;
   font-size: 14px;
   border-radius: 6px;
-  border-left: 3px solid var(--team);
   color: var(--text);
 }
 [data-ui='fan'] .gap.leader {

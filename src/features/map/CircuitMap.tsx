@@ -18,7 +18,29 @@ import { observeReport, renderProgress, type LegStats, type MotionState } from '
 import { unwrapForward } from '../../domain/speed';
 import { Icon } from '../../components/Icon';
 import type { Snapshot } from '../../domain/schema';
-export const CircuitMap = memo(function CircuitMap({ large = false }: { large?: boolean }) {
+export function CircuitMap({ large = false }: { large?: boolean }) {
+  const session = useRace((s) => s.snapshot?.session);
+  const live = useRuntime((s) => s.provider?.id === 'live');
+  if (session ? session.trackId !== 'mount-panorama' : live) {
+    return (
+      <section className="panel circuit-panel" aria-label="Track map">
+        <div className="panel-heading">
+          <h2>{session?.trackName || 'Track map'}</h2>
+        </div>
+        <div className="empty">
+          <p>
+            {session
+              ? 'There is no map for this circuit. You can still follow the standings and race updates.'
+              : 'Waiting for the timing feed to identify the circuit.'}
+          </p>
+        </div>
+      </section>
+    );
+  }
+  return <MountPanoramaMap large={large} />;
+}
+
+const MountPanoramaMap = memo(function MountPanoramaMap({ large }: { large: boolean }) {
   const snapshot = useRace((s) => s.snapshot);
   const received = useRace((s) => s.receivedMono);
   const status = useRace((s) => s.status);
@@ -28,8 +50,7 @@ export const CircuitMap = memo(function CircuitMap({ large = false }: { large?: 
   const select = useUI((s) => s.select);
   // Live mode applies even before the first snapshot: with no session on
   // the feed there is nothing to show, but demo furniture must not appear.
-  const liveMode =
-    useRuntime((s) => s.provider?.id === 'live') || snapshot?.source === 'live';
+  const liveMode = useRuntime((s) => s.provider?.id === 'live') || snapshot?.source === 'live';
   const reduced = useReducedMotion();
   const svg = useRef<SVGSVGElement>(null);
   const nodes = useRef(new Map<string, SVGGElement>());
@@ -176,7 +197,9 @@ export const CircuitMap = memo(function CircuitMap({ large = false }: { large?: 
         </div>
         <span className={'source-chip ' + (profile === 'position' ? '' : 'estimated')}>
           {profile === 'position'
-            ? 'SIMULATED POSITIONS'
+            ? liveMode
+              ? 'REPORTED POSITIONS'
+              : 'SIMULATED POSITIONS'
             : profile === 'classification'
               ? 'POSITIONS UNAVAILABLE'
               : 'ESTIMATED · ' + (profile === 'sector' ? 'SECTOR' : 'LAP')}
@@ -284,12 +307,7 @@ export const CircuitMap = memo(function CircuitMap({ large = false }: { large?: 
                   return (
                     <g key={l.name}>
                       <circle cx={pt.x} cy={pt.y} r="6" className="sector-anchor" />
-                      <text
-                        x={pt.x}
-                        y={pt.y - 12}
-                        textAnchor="middle"
-                        className="sector-label"
-                      >
+                      <text x={pt.x} y={pt.y - 12} textAnchor="middle" className="sector-label">
                         {l.name}
                       </text>
                     </g>

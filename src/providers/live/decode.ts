@@ -53,7 +53,31 @@ export interface ResolvedTimingUrl {
 }
 
 /** The meeting feed this companion follows unless another URL is entered. */
-export const DEFAULT_LIVE_URL = 'http://server.natsoft.com.au:8080/LiveMeeting/20261011.MOUN';
+export const DEFAULT_LIVE_URL = 'http://server.natsoft.com.au:8080/LiveMeeting/20261108.SAN';
+
+/** The official client obtains a short-lived socket token from this public page. */
+export async function prepareMeetingSocket(socketUrl: string, signal: AbortSignal) {
+  const socket = new URL(socketUrl);
+  if (
+    socket.host !== 'server.natsoft.com.au:8080' ||
+    !/^\/LiveMeeting\/\d{8}\.[A-Za-z0-9]+$/.test(socket.pathname)
+  )
+    return socketUrl;
+
+  socket.protocol = 'wss:';
+  if (socket.searchParams.has('Token')) return socket.href;
+  const page = new URL(socket.pathname, 'https://' + socket.host);
+  const response = await fetch(page, {
+    signal,
+    credentials: 'omit',
+    cache: 'no-store',
+    redirect: 'error',
+  });
+  if (!response.ok) throw new Error('Could not load the Natsoft meeting page');
+  const token = /\bgsLiveToken\s*=\s*"([\w-]{1,2048})"/.exec(await response.text())?.[1];
+  if (token) socket.searchParams.set('Token', token);
+  return socket.href;
+}
 
 /**
  * Browsers block insecure `ws://` sockets from `https://` pages (mixed
@@ -89,10 +113,13 @@ export function resolveTimingUrl(input: string): ResolvedTimingUrl {
   if (parsed.protocol === 'http:' || parsed.protocol === 'https:') {
     const override = parsed.searchParams.get('ConnectTo');
     if (override) return resolveTimingUrl(override);
-    socketUrl = trimmed
-      .replace(/^https:/i, 'wss:')
-      .replace(/^http:/i, 'ws:')
-      .split('?')[0];
+    const token = parsed.searchParams.get('Token');
+    const socket = new URL(parsed);
+    socket.protocol = parsed.protocol === 'https:' ? 'wss:' : 'ws:';
+    socket.search = '';
+    socket.hash = '';
+    if (token) socket.searchParams.set('Token', token);
+    socketUrl = socket.href;
   } else if (parsed.protocol === 'ws:' || parsed.protocol === 'wss:') {
     if (!parsed.hostname) throw new Error('Enter a full timing URL with a host.');
     socketUrl = trimmed;

@@ -1,4 +1,68 @@
 import { test, expect, type Page } from '@playwright/test';
+import { encodePacket } from '../src/providers/live/decode';
+
+test('SAN meeting retries when unavailable and shows live driver changes without a Bathurst map', async ({
+  page,
+}) => {
+  const pageUrl = 'http://server.natsoft.com.au:8080/LiveMeeting/20261108.SAN';
+  const meeting = pageUrl.replace(/^http:/, 'https:');
+  const socketUrl = meeting.replace(/^https:/, 'wss:');
+  let requests = 0;
+  let connections = 0;
+  let feed: import('@playwright/test').WebSocketRoute | undefined;
+  await page.clock.install();
+  await page.route(meeting, (route) => {
+    requests++;
+    return route.fulfill({
+      contentType: 'text/html',
+      headers: { 'Access-Control-Allow-Origin': '*' },
+      body: '<script>var gsLiveToken="test-token-' + requests + '";</script>',
+    });
+  });
+  await page.routeWebSocket(
+    (url) => url.href.startsWith(socketUrl + '?'),
+    (socket) => {
+      connections++;
+      expect(socket.url()).toBe(socketUrl + '?Token=test-token-' + connections);
+      feed = socket;
+      if (connections === 1) socket.send(encodePacket('<NotFound />'));
+    },
+  );
+  await page.goto('/');
+  await expect(page.getByText(/Live timing is not available for this meeting/)).toBeVisible();
+  await expect(page.getByText('No timing data yet')).toBeVisible();
+  await expect(page.locator('.circuit-svg')).toHaveCount(0);
+  await page.clock.fastForward(30_000);
+  await expect.poll(() => connections).toBe(2);
+  expect(requests).toBe(2);
+
+  // Synthetic data in the observed Natsoft packet format, not captured SAN results.
+  feed!.send(
+    encodePacket(
+      '<New T="1794090000" Seq="1"><M D="Test meeting 2026" />' +
+        '<T C="SAN" N="Test circuit"><TP ID="1" Y="Pos1" /></T>' +
+        '<E C="R1" D="Test Race 1" Y="Race" L="10" />' +
+        '<RL><R ID="1" N="07" V="Toyota"><V ID="1" N="Driver_One" /><V ID="2" N="Driver_Two" /></R></RL>' +
+        '<C Y="T" C="500" E="100" /><S S="Green" />' +
+        '<L Y="f"><P L="1" C="1" D="1"><D L="2" LP="1" /></P></L></New>',
+    ),
+  );
+  await expect(page.getByRole('heading', { name: 'Test Race 1' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'View car 07, Driver One' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Test circuit' })).toBeVisible();
+  await expect(page.locator('.circuit-svg')).toHaveCount(0);
+  await page.getByRole('button', { name: 'Favourite car 07', exact: true }).click();
+  feed!.send(encodePacket('<L T="1794090001" Y="p"><P L="1" C="1" D="2"><D PF="P" /></P></L>'));
+  await expect(page.getByRole('button', { name: 'View car 07, Driver Two' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Unfavourite car 07', exact: true })).toBeVisible();
+  await page.getByRole('link', { name: 'Race updates', exact: true }).click();
+  await expect(
+    page.getByRole('button', { name: 'Car 07 · Driver Two now driving', exact: true }),
+  ).toBeVisible();
+  await page.getByRole('link', { name: 'Settings', exact: true }).click();
+  await expect(page.getByText(pageUrl, { exact: true })).toBeVisible();
+  expect(await page.evaluate(() => JSON.stringify(localStorage))).not.toContain('test-token-');
+});
 async function lab(page: Page) {
   await page.getByRole('button', { name: 'Demo controls', exact: true }).click();
   await expect(page.getByRole('dialog')).toBeVisible();

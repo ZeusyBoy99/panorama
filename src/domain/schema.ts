@@ -66,7 +66,7 @@ export const entrySchema = z.object({
   id,
   number: z.string().min(1).max(8),
   team: z.object({ id, name: text, colour: z.string().regex(/^#[0-9a-fA-F]{6}$/) }),
-  drivers: z.tuple([z.object({ id, name: text }), z.object({ id, name: text })]),
+  drivers: z.array(z.object({ id, name: text })).max(24),
   currentDriverId: id.nullable(),
   position: z.number().int().min(1).max(100).nullable(),
   grid: z.number().int().min(1).max(100).nullable(),
@@ -124,6 +124,7 @@ export const snapshotSchema = z
       series: text.nullable().optional(),
       season: z.number().int(),
       trackId: id,
+      trackName: text.optional(),
       type: z.enum(['race', 'practice', 'qualifying']),
       raceLaps: z.number().int().positive(),
       /** True when the session runs to time (or laps are unbounded, e.g. practice): raceLaps is then only a fallback, not a scheduled distance. Live only. */

@@ -72,7 +72,7 @@ export interface BoardRow {
   /** Entry index into the RL entry list (P@C). */
   carIdx: number;
   /** Driver slot (P@D -> V@ID). */
-  driverSlot: number;
+  driverSlot: number | null;
   /** Merged D attributes; only keys ever sent are present. */
   data: Attrs;
   /** Server timestamp (seconds) of the last packet touching this row. */
@@ -167,7 +167,12 @@ function importBoardRow(state: LiveFeedState, p: Attrs, d: Attrs, serverT: numbe
   const row: BoardRow = {
     pos: num(p['L'], existing?.pos ?? 0),
     carIdx,
-    driverSlot: num(p['D'], existing?.driverSlot ?? 1),
+    driverSlot:
+      p['D'] === undefined
+        ? (existing?.driverSlot ?? null)
+        : /^\d+$/.test(p['D'])
+          ? Number(p['D'])
+          : null,
     data: merged,
     updatedT: serverT,
     segmentT:

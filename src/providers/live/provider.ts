@@ -19,17 +19,28 @@
 
 import type { Snapshot } from '../../domain/schema';
 import type { ProviderStatus, TimingProvider } from '../contract';
-import { decodePacket, resolveTimingUrl, upgradeToSecureSocket } from './decode';
+import {
+  decodePacket,
+  prepareMeetingSocket,
+  resolveTimingUrl,
+  upgradeToSecureSocket,
+} from './decode';
 import { applyPacket, emptyState, type LiveFeedState } from './state';
 import { LIVE_CAPABILITIES, NatsoftAdapter } from './adapter';
 
 const BACKOFF = [1000, 2000, 4000, 8000, 16000, 30000];
 const PUBLISH_MS = 500;
 const MAX_REDIRECTS = 3;
+const MEETING_RECHECK_MS = 30_000;
 
 function fileSlug(pageUrl: string): string {
   const path = new URL(pageUrl).pathname.split('/').filter(Boolean).pop() ?? 'meeting';
-  return path.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') || 'meeting';
+  return (
+    path
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '') || 'meeting'
+  );
 }
 
 export class NatsoftLiveProvider implements TimingProvider {
@@ -58,14 +69,19 @@ export class NatsoftLiveProvider implements TimingProvider {
   private connectCount = 0;
   private redirects = 0;
   readonly pageUrl: string;
+  private readonly initialSocketUrl: string;
   private socketUrl: string;
+  private bootstrap: AbortController | null = null;
 
   constructor(pageUrl: string) {
     const resolved = resolveTimingUrl(pageUrl);
-    this.pageUrl = resolved.pageUrl;
-    const pageProtocol =
-      typeof window !== 'undefined' ? window.location.protocol : 'https:';
-    this.socketUrl = upgradeToSecureSocket(resolved.socketUrl, pageProtocol);
+    const page = new URL(resolved.pageUrl);
+    page.search = '';
+    page.hash = '';
+    this.pageUrl = page.href;
+    const pageProtocol = typeof window !== 'undefined' ? window.location.protocol : 'https:';
+    this.initialSocketUrl = upgradeToSecureSocket(resolved.socketUrl, pageProtocol);
+    this.socketUrl = this.initialSocketUrl;
     this.adapter = new NatsoftAdapter(fileSlug(this.pageUrl), 'live');
   }
 
@@ -101,50 +117,65 @@ export class NatsoftLiveProvider implements TimingProvider {
   connect() {
     this.stopped = false;
     this.attempt = 0;
-    this.open();
+    void this.open();
   }
 
   disconnect() {
     this.stopped = true;
     if (this.retryTimer) clearTimeout(this.retryTimer);
-    if (this.publishTimer) clearTimeout(this.publishTimer);
-    if (this.watchdogTimer) clearInterval(this.watchdogTimer);
-    this.retryTimer = this.publishTimer = this.watchdogTimer = null;
-    this.socket?.close();
-    this.socket = null;
-    this.status = { connection: 'stopped', message: 'Live timing stopped', paused: false, speed: 1 };
+    this.retryTimer = null;
+    this.closeConnection();
+    this.status = {
+      connection: 'stopped',
+      message: 'Live timing stopped',
+      paused: false,
+      speed: 1,
+    };
     this.announce();
   }
 
-  private open() {
+  private async open() {
     if (this.stopped) return;
-    this.status = { connection: 'connecting', message: 'Connecting to live timing', paused: false, speed: 1 };
+    this.status = {
+      connection: 'connecting',
+      message: 'Connecting to live timing',
+      paused: false,
+      speed: 1,
+    };
     this.announce();
+    const bootstrap = new AbortController();
+    this.bootstrap = bootstrap;
     let socket: WebSocket;
     try {
-      socket = new WebSocket(this.socketUrl);
+      const url = await prepareMeetingSocket(
+        this.socketUrl,
+        AbortSignal.any([bootstrap.signal, AbortSignal.timeout(8000)]),
+      );
+      if (this.stopped || this.bootstrap !== bootstrap) return;
+      socket = new WebSocket(url);
     } catch {
-      this.scheduleRetry('Could not open the timing connection');
+      if (this.bootstrap === bootstrap) this.scheduleRetry('Could not open the timing connection');
       return;
+    } finally {
+      if (this.bootstrap === bootstrap) this.bootstrap = null;
     }
     this.socket = socket;
     this.connectCount += 1;
+    this.state = emptyState();
+    this.lastPacketMono = performance.now();
+    this.watchdogTimer = setInterval(() => this.watchdog(), 2000);
 
-    socket.onopen = () => {
-      this.attempt = 0;
-      this.redirects = 0;
-      this.status = { connection: 'connected', message: 'Live timing · Natsoft feed', paused: false, speed: 1 };
-      this.announce();
-    };
     socket.onmessage = (event) => {
+      if (this.socket !== socket) return;
       try {
         const xml = decodePacket(String(event.data));
-        this.lastPacketMono = performance.now();
         const result = applyPacket(this.state, xml);
         if (result.redirect !== undefined) {
           this.followRedirect(result.redirect);
           return;
         }
+        if (result.change === 'none') return;
+        this.lastPacketMono = performance.now();
         if (result.change === 'reset') {
           const seq = /Seq="([^"]*)"/.exec(xml)?.[1] ?? String(this.connectCount);
           this.adapter = new NatsoftAdapter(
@@ -155,9 +186,7 @@ export class NatsoftLiveProvider implements TimingProvider {
         this.schedulePublish();
       } catch (error) {
         if (error instanceof Error && /not available/i.test(error.message)) {
-          this.status = { connection: 'error', message: error.message, paused: false, speed: 1 };
-          this.announce();
-          this.closeAndStop();
+          this.scheduleRetry(error.message, MEETING_RECHECK_MS);
         }
         // Other malformed packets are ignored; the last valid snapshot stands.
       }
@@ -167,7 +196,6 @@ export class NatsoftLiveProvider implements TimingProvider {
     };
     socket.onclose = () => {
       if (this.socket !== socket) return;
-      this.socket = null;
       if (!this.stopped) this.scheduleRetry('Live timing connection lost');
     };
   }
@@ -181,22 +209,23 @@ export class NatsoftLiveProvider implements TimingProvider {
       const resolved = resolveTimingUrl(url);
       if (!/^wss?:/i.test(resolved.socketUrl)) throw new Error('bad redirect');
       this.redirects += 1;
-      this.socketUrl = resolved.socketUrl;
+      this.socketUrl = upgradeToSecureSocket(
+        resolved.socketUrl,
+        new URL(this.socket?.url ?? this.socketUrl).protocol === 'wss:' ? 'https:' : 'http:',
+      );
     } catch {
       this.scheduleRetry('Timing server redirect was rejected');
       return;
     }
-    this.socket?.close();
-    this.socket = null;
-    this.open();
+    this.closeConnection();
+    void this.open();
   }
 
   private schedulePublish() {
     if (this.publishTimer || this.stopped) return;
-    if (!this.watchdogTimer) this.watchdogTimer = setInterval(() => this.watchdog(), 2000);
     this.publishTimer = setTimeout(() => {
       this.publishTimer = null;
-      if (this.stopped || this.status.connection !== 'connected') return;
+      if (this.stopped || !this.socket) return;
       this.publishNow();
     }, PUBLISH_MS);
   }
@@ -207,6 +236,16 @@ export class NatsoftLiveProvider implements TimingProvider {
       if (snapshot) {
         this.lastPublishMono = performance.now();
         this.emit(snapshot);
+        if (this.status.connection !== 'connected') {
+          this.attempt = 0;
+          this.status = {
+            connection: 'connected',
+            message: 'Live timing · Natsoft feed',
+            paused: false,
+            speed: 1,
+          };
+          this.announce();
+        }
       }
     } catch {
       // A transient build failure must not kill the feed; retry next tick.
@@ -221,27 +260,26 @@ export class NatsoftLiveProvider implements TimingProvider {
    * last classification simply stands with its original timestamps.
    */
   private watchdog() {
-    if (this.stopped || this.status.connection !== 'connected') return;
+    if (this.stopped || !this.socket) return;
     const now = performance.now();
-    if (now - this.lastPublishMono >= 2000) this.publishNow();
+    const connected = this.status.connection === 'connected';
+    if (connected && now - this.lastPublishMono >= 2000) this.publishNow();
     const phase = this.adapter.phase;
-    if (
-      this.lastPacketMono > 0 &&
-      now - this.lastPacketMono > 30000 &&
-      phase !== '' &&
-      phase !== 'finished'
-    ) {
+    if (now - this.lastPacketMono > 30000 && (!connected || phase !== 'finished')) {
       this.socket?.close();
     }
   }
 
-  private scheduleRetry(message: string) {
+  private scheduleRetry(message: string, meetingRecheck?: number) {
     if (this.stopped) return;
-    const delay = BACKOFF[Math.min(this.attempt, BACKOFF.length - 1)];
+    this.closeConnection();
+    const delay = meetingRecheck ?? BACKOFF[Math.min(this.attempt, BACKOFF.length - 1)];
     this.attempt += 1;
     this.status = {
-      connection: 'reconnecting',
-      message: message + ' · retrying',
+      connection: meetingRecheck ? 'error' : 'reconnecting',
+      message: meetingRecheck
+        ? message + ' Checking again in 30 seconds.'
+        : message + ' · retrying',
       paused: false,
       speed: 1,
     };
@@ -249,12 +287,20 @@ export class NatsoftLiveProvider implements TimingProvider {
     if (this.retryTimer) clearTimeout(this.retryTimer);
     this.retryTimer = setTimeout(() => {
       this.retryTimer = null;
-      this.open();
+      this.redirects = 0;
+      this.socketUrl = this.initialSocketUrl;
+      void this.open();
     }, delay);
   }
 
-  private closeAndStop() {
-    this.socket?.close();
+  private closeConnection() {
+    this.bootstrap?.abort();
+    this.bootstrap = null;
+    if (this.publishTimer) clearTimeout(this.publishTimer);
+    if (this.watchdogTimer) clearInterval(this.watchdogTimer);
+    this.publishTimer = this.watchdogTimer = null;
+    const socket = this.socket;
     this.socket = null;
+    if (socket && socket.readyState < WebSocket.CLOSING) socket.close();
   }
 }

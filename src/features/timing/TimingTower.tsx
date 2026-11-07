@@ -232,7 +232,13 @@ export function TimingTower() {
           })}
         </tbody>
       </table>
-      {!cars.length && (
+      {!snapshot ? (
+        <div className="empty">
+          <Icon name="activity" />
+          <strong>No timing data yet</strong>
+          <p>Standings will appear when the feed sends a classification.</p>
+        </div>
+      ) : !cars.length && (
         <div className="empty">
           <Icon name="search" />
           <strong>No cars match</strong>
@@ -252,14 +258,12 @@ export function TimingTower() {
         <span>
           <i className="legend-dot green" /> Personal best
         </span>
-        <span className="muted">
-          {snapshot?.entries.length ?? 0}{' '}
-          {snapshot?.source === 'live'
-            ? 'live cars'
-            : snapshot?.source === 'replay'
-              ? 'replay cars'
-              : 'demo cars'}
-        </span>
+        {snapshot && (
+          <span className="muted">
+            {snapshot.entries.length}{' '}
+            {snapshot.source === 'live' ? 'live cars' : snapshot.source === 'replay' ? 'replay cars' : 'demo cars'}
+          </span>
+        )}
       </div>
     </section>
   );

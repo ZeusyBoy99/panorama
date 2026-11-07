@@ -43,10 +43,13 @@ function Header() {
   const liveActive = useRuntime((s) => s.provider?.id === 'live');
   const friendly = useUI((s) => s.preferences.uiStyle) === 'fan';
   const selected = useUI((s) => s.selectedId);
-  const route = (pathname: string) => ({
-    pathname,
-    search: selected ? '?car=' + encodeURIComponent(selected) : '',
-  });
+  const [params] = useSearchParams();
+  const route = (pathname: string, keepCar = true) => {
+    const query = new URLSearchParams();
+    if (params.has('demo')) query.set('demo', '');
+    if (keepCar && selected) query.set('car', selected);
+    return { pathname, search: query.size ? '?' + query.toString() : '' };
+  };
   const online = useOnline(),
     now = useTicker();
   const age =
@@ -58,7 +61,7 @@ function Header() {
   const liveProvider = useRuntime((s) => s.provider?.id === 'live');
   const live = snapshot?.source === 'live' || liveProvider;
   const sessionType = snapshot?.session.type;
-  const raceLaps = snapshot?.session.raceLaps ?? 161;
+  const raceLaps = snapshot?.session.raceLaps ?? (live ? null : 161);
   const remaining = snapshot?.session.remaining ?? null;
   const timed = snapshot?.session.timed ?? false;
   const elapsed = snapshot?.session.elapsed ?? 0;
@@ -68,7 +71,7 @@ function Header() {
   const progress =
     timed && remaining !== null && elapsed + remaining > 0
       ? Math.min(100, (elapsed / (elapsed + remaining)) * 100)
-      : !timed && raceLaps > 0
+      : !timed && raceLaps !== null && raceLaps > 0
         ? Math.min(100, (leaderLaps / raceLaps) * 100)
         : null;
   return (
@@ -77,7 +80,7 @@ function Header() {
         <div className={'flag-strip ' + track} aria-hidden="true" />
       )}
       <header className="topbar">
-        <NavLink to="/" className="brand" aria-label="Panorama home">
+        <NavLink to={route('/', false)} className="brand" aria-label="Panorama home">
           <span className="brand-mark">
             P<span />
           </span>
@@ -199,7 +202,7 @@ function Header() {
             <span>{friendly ? (timed ? 'Laps' : 'Leader’s lap') : 'LAP'}</span>
             <strong>
               {snapshot?.session.leaderLaps ?? '—'}
-              {!timed && <small> / {raceLaps}</small>}
+              {!timed && raceLaps !== null && <small> / {raceLaps}</small>}
             </strong>
             {progress !== null && (
               <div className="progress-track">
@@ -209,7 +212,7 @@ function Header() {
           </div>
           <div className="race-clock">
             <span>{friendly ? 'Race time' : 'RACE TIME'}</span>
-            <strong>{clockTime(snapshot?.session.elapsed ?? 0)}</strong>
+            <strong>{live && !snapshot ? '—' : clockTime(snapshot?.session.elapsed ?? 0)}</strong>
             {live && remaining !== null && (
               <span className="remaining-time">{clockTime(remaining)} left</span>
             )}
@@ -239,7 +242,7 @@ function Header() {
                             : status.connection === 'stopped'
                               ? 'Feed stopped'
                               : 'Feed connected'}
-              <b>· {Math.floor(age / 1000)}s</b>
+              {snapshot && <b>· {Math.floor(age / 1000)}s</b>}
             </span>
           </div>
         </div>
@@ -273,7 +276,7 @@ function LiveFooter() {
   const snapshot = useRace((s) => s.snapshot);
   const liveProvider = useRuntime((s) => s.provider?.id === 'live');
   if (snapshot?.source === 'live' || liveProvider)
-    return <span>Live timing · Natsoft Race Results · Positions are coarse track segments</span>;
+    return <span>Live timing · Natsoft Race Results</span>;
   return <span>Fictional demo · OpenStreetMap circuit geometry · No official affiliation</span>;
 }
 export function App() {

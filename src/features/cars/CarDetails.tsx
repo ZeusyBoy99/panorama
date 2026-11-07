@@ -126,15 +126,18 @@ function Contents({ entry, full = false }: { entry: Entry; full?: boolean }) {
       {full && (
         <>
           <div className="detail-section">
-            <h4>Driver pairing</h4>
-            {entry.drivers.map((d) => (
-              <div className="driver-pair" key={d.id}>
-                <span>{d.name}</span>
-                <span className={d.id === entry.currentDriverId ? 'accent' : 'muted'}>
-                  {d.id === entry.currentDriverId ? 'CURRENT DRIVER' : 'CO-DRIVER'}
-                </span>
-              </div>
-            ))}
+            <h4>Drivers</h4>
+            {entry.drivers.length === 0 && <p className="muted">No driver names supplied.</p>}
+            {entry.drivers
+              .filter((d) => d.name !== '—')
+              .map((d) => (
+                <div className="driver-pair" key={d.id}>
+                  <span>{d.name}</span>
+                  <span className={d.id === entry.currentDriverId ? 'accent' : 'muted'}>
+                    {d.id === entry.currentDriverId ? 'CURRENT DRIVER' : 'REGISTERED DRIVER'}
+                  </span>
+                </div>
+              ))}
           </div>
           <div className="detail-section">
             <h4>Sector timing</h4>
@@ -175,6 +178,7 @@ function Contents({ entry, full = false }: { entry: Entry; full?: boolean }) {
           </div>
           <div className="detail-section">
             <h4>Stint history</h4>
+            {entry.stints.length === 0 && <p className="muted">No driver stints recorded.</p>}
             {entry.stints.map((s, i) => (
               <div className="driver-pair" key={i}>
                 <span>

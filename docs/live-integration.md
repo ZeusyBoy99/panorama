@@ -4,7 +4,28 @@ Stage 1 ended with an empty seam. The owner then supplied a public Natsoft
 URL (`http://server.natsoft.com.au:8080/LiveMeeting/20261011.MOUN`, no
 login), and this document records what the source was found to offer and how
 it is connected. Paste a `LiveMeeting/<file>` page URL into Settings → Live
-timing to connect; the app opens the feed's WebSocket directly.
+timing to connect; the app opens the feed's WebSocket directly. The current
+default is `http://server.natsoft.com.au:8080/LiveMeeting/20261108.SAN`.
+Previously saved meeting URLs still take precedence.
+
+## Meeting 20261108.SAN (verified 7 November 2026)
+
+The supplied meeting page returned HTTP 200 and exposes a temporary
+`gsLiveToken`. The Natsoft client appends it to its WebSocket URL. The HTTPS
+page allows cross-origin requests, so Panorama can fetch the token directly
+and open the secure socket on port 8080. It does not execute the meeting
+page or persist the token. The handshake worked in Chromium, but Natsoft
+returned `<NotFound />`; no SAN classification was available to verify.
+Panorama shows the unavailable state and retries with a fresh token every
+30 seconds. A synthetic browser fixture verifies recovery into standings
+when the feed subsequently sends a session and classification.
+Chromium and WebKit both passed the fixture covering retry, standings and
+a driver change without losing the car's favourite. The full checks passed:
+53 domain tests, 24 browser tests, lint and the production build.
+
+The standings, event feed and driver details work independently of the
+circuit map. A live meeting shows the Bathurst outline only once its feed
+identifies Mount Panorama. Other circuits show an unavailable map notice.
 
 ## Inspected source (11 October 2026, 2026 Repco Bathurst 1000)
 
@@ -74,8 +95,11 @@ served over HTTPS (browsers block insecure sockets from secure pages).
   refreshing with honestly growing ages through packet stalls, and
   resynchronises when a running session goes quiet for 30 s. A finished
   session going quiet is normal: the last classification stands.
-- Single-driver sprint entries show the driver plus a `—` second slot, as
-  the schema requires a driver pair. DNS cars (0 laps once the leader is
-  away, zero speed) are `unknown`, not invented retirements.
+- The adapter keeps registered drivers from `R/V` and selects the driver
+  in the car using the leaderboard's `P@D` slot. Observed slot changes
+  append a stint and race update under the same car identity. An unknown
+  slot is left unknown; the feed does not establish permanent main-driver
+  or co-driver roles. DNS cars (0 laps once the leader is away, zero speed)
+  are `unknown`, not invented retirements.
 - `trackKm` is 6.213 for Mount Panorama and null elsewhere; `meeting` and
   `series` are optional session fields so older replays still validate.

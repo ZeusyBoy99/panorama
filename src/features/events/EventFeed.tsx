@@ -68,7 +68,9 @@ export function EventFeed({ compact = false }: { compact?: boolean }) {
                 {e.message.startsWith('Possible incident')
                   ? 'Derived · position drop — cause unknown, not a crash claim'
                   : e.origin === 'derived'
-                    ? 'Derived · classification change'
+                    ? e.category === 'driver'
+                      ? 'Observed · driver change'
+                      : 'Derived · classification change'
                     : live
                       ? 'Supplied · live feed'
                       : 'Supplied · simulated feed'}
@@ -79,7 +81,7 @@ export function EventFeed({ compact = false }: { compact?: boolean }) {
         {!events.length && (
           <div className="empty">
             <Icon name="flag" />
-            <strong>No matching events</strong>
+            <strong>{only ? 'No matching events' : 'No race updates yet'}</strong>
             <p>New race events will appear here.</p>
           </div>
         )}
